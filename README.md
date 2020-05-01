@@ -27,7 +27,10 @@ A HL Log Standard parser and competitive match stats generator for Day of Defeat
    ```
    python3 __main__.py
    ```
-    
+ 
+ ## How do I see the generated match content?
+   - Check your provided MySQL database, everything will be there.
+ 
  ## Quick notes about this program
    - It only stores events and stats of valid matches.
    
