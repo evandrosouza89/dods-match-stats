@@ -1,6 +1,9 @@
 # DODS-MATCH-STATS
 A HL Log Standard parser and competitive match stats generator for Day of Defeat Source game.
 
+## License
+dods-match-stats is licensed under the MIT License. A short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.
+
 ## Requirements
   - Day of Defeat Source game server
   - Python3
