@@ -8,15 +8,18 @@ from . import config
 
 class RemoteLogListener(Thread):
     __END_OF_MESSAGE = bytearray('\x00\n', 'utf-8')
-
-    __port = int(config.get("LogListenerSection", "loglistener.port"))
-
+    __port_from_config = int(config.get("LogListenerSection", "loglistener.port"))
     __trusted_address = config.get("LogListenerSection", "gameserver.address")
 
-    def __init__(self):
+    def __init__(self, port):
         Thread.__init__(self)
         self.__server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.__server_socket.bind(("0.0.0.0", RemoteLogListener.__port))
+        self.__port = None
+        if port is not None:
+            self.__port = int(port)
+        else:
+            self.__port = RemoteLogListener.__port_from_config
+        self.__server_socket.bind(("0.0.0.0", self.__port))
         self.__incomplete_message = None
         self.__message_queue = queue.Queue()
 
@@ -51,7 +54,7 @@ class RemoteLogListener(Thread):
                     self.__message_queue.put(message)
 
     def run(self):
-        logging.info("[RemoteLogListener] - Listening for logs at port: " + str(RemoteLogListener.__port))
+        logging.info("[RemoteLogListener] - Listening for logs at port: " + str(self.__port))
         while True:
             buffer, address = self.__server_socket.recvfrom(65535)
 

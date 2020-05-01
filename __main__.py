@@ -28,27 +28,42 @@ def __read_from_logs_folder(input_dir):
         __event_reader.read()
 
 
-def __read_from_remote_log_listener():
-    log_listener = RemoteLogListener()
+def __read_from_remote_log_listener(port):
+    log_listener = RemoteLogListener(port)
     log_listener.start()
     __event_reader = EventReader(log_listener, __event_processor)
     __event_reader.read()
 
 
 def main(argv):
+    port = None
     input_dir = ""
 
     try:
-        opts, args = getopt.getopt(argv, "hi:", ["input="])
+        opts, args = getopt.getopt(argv, "hi:p:", ["input=", "port="])
     except getopt.GetoptError:
         print("Invalid arguments! try dods_match_stats.py -h for help")
         sys.exit(2)
+
+    invalid_flag = False
+
     for opt, arg in opts:
-        if opt in ("-h", "--help"):
-            print("Usage example: dods_match_stats.py -i <inputdir>")
-            sys.exit()
-        elif opt in ("-i", "--input"):
-            input_dir = arg
+        if not invalid_flag:
+            if opt in ("-h", "--help"):
+                print(
+                    "Usage example: 'dods_match_stats.py -i <inputdir>' or (exclusive) 'dods_match_stats.py -p 27016'")
+                sys.exit()
+            elif opt in ("-i", "--input"):
+                input_dir = arg
+            elif opt in ("-p", "--port"):
+                port = arg
+            else:
+                print("Invalid arguments! try dods_match_stats.py -h for help")
+                sys.exit(2)
+        else:
+            print("Invalid arguments! try dods_match_stats.py -h for help")
+            sys.exit(2)
+        invalid_flag = True
 
     if input_dir != "":
         if input_dir.endswith(os.sep):
@@ -58,7 +73,7 @@ def main(argv):
         __read_from_logs_folder(input_dir)
     else:
         logging.info("[Main] - dods-match-status started!")
-        __read_from_remote_log_listener()
+        __read_from_remote_log_listener(port)
 
 
 if __name__ == "__main__":
