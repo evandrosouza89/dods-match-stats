@@ -1,6 +1,19 @@
 # DODS-MATCH-STATS
 A HL Log Standard parser and competitive match stats generator for Day of Defeat Source game.
 
+What kind of events does it store?
+Every game event that makes sense in a competitive match, including:
+
+- Kills / Deaths / Attacks / Flag captures / Flag blocks / Round win events / Tick scores / Chat messages / Connections / Disconnections / Name changes / Role changes / Domination events / Revenge events / Joined team events / Suicide events
+
+What kind of stats does it generate and store?
+
+- Total Enemy damage / Total team damage / Average damage per life
+- Kills / Deaths / Team kills / Team killed / Suicides / Headshots
+- Streak stats
+- Flag capture stats, including game score stats
+- Weapon stats
+
 ## License
 dods-match-stats is licensed under the MIT License. A short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.
 
