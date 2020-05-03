@@ -9,15 +9,17 @@ from . import config
 class RemoteLogListener(Thread):
     __END_OF_MESSAGE = bytearray('\x00\n', 'utf-8')
     __port_from_config = int(config.get("LogListenerSection", "loglistener.port"))
-    __trusted_address = config.get("LogListenerSection", "gameserver.address")
+    __trusted_address_from_config = config.get("LogListenerSection", "gameserver.address")
 
-    def __init__(self, port):
+    def __init__(self, ip, port):
         Thread.__init__(self)
         self.__server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.__port = None
-        if port is not None:
+        if ip is not None and port is not None:
+            self.__trusted_address = ip
             self.__port = int(port)
         else:
+            self.__trusted_address = RemoteLogListener.__trusted_address_from_config
             self.__port = RemoteLogListener.__port_from_config
         self.__server_socket.bind(("0.0.0.0", self.__port))
         self.__incomplete_message = None
@@ -54,14 +56,16 @@ class RemoteLogListener(Thread):
                     self.__message_queue.put(message)
 
     def run(self):
-        logging.info("[RemoteLogListener] - Listening for logs at port: " + str(self.__port))
+        logging.info("[RemoteLogListener] - Listening for remote logs at port: " + str(self.__port))
+        logging.info("[RemoteLogListener] - Accepting remote logs from: " + self.__trusted_address)
+
         while True:
             buffer, address = self.__server_socket.recvfrom(65535)
 
             logging.debug("[RemoteLogListener] - Received: [" + buffer.decode("utf-8", errors='ignore')
                           + "] from " + address[0] + ":" + str(address[1]))
 
-            if address[0] == RemoteLogListener.__trusted_address:
+            if address[0] == RemoteLogListener.__trusted_address_from_config:
                 RemoteLogListener.__process_buffer(self, buffer)
             else:
                 logging.warning("[RemoteLogListener] - Discarded: [" + buffer.decode("utf-8", errors='ignore')

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://screenshots.gamebanana.com/img/ss/tuts/594aefee16732.webp">
+  <img src="/assets/banner.jpg">
 </p>
 
 
@@ -44,11 +44,27 @@ dods-match-stats is licensed under the MIT License. A short and simple permissiv
   - Edit **config_file.properties** and carefully fulfill all the fields with correct information, remember that, if the game server isn`t in the same machine as the dods-matchs-stats you will have to open your **loglistener.port** UDP port for incoming conections in your network/firewall
   
  ## How to run
+ ### Listening to remote logs using [config_file.properties](config_file.properties)
+ Use this one if you want to track one game server only
+ 
    - Execute command:
    ```
    python3 __main__.py
    ```
+ ### Listening to remote logs using command line arguments
+ Use this if you want to run multiple dods-match-stats instances for tracking multiple servers
  
+   - Execute command (without the brackets [ ]):
+   ```
+   python3 __main__.py -t [remote.adress.ip] -p localport -l "/path/to/output/log.file"  
+   ```
+ ### Run once providing server's log files
+ Use this if you want to feed the database with past log files or missing log files. It accepts wild cards. For example "../logs/l*.log" 
+ 
+   - Execute command (without the brackets [ ]):
+   ```
+   python3 __main__.py -i "/path/to/input/log.file"  
+   ``` 
  ## How do I see the generated match content?
    - Check your provided MySQL database, everything will be there.
  
