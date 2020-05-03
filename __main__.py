@@ -5,8 +5,9 @@ import glob
 import logging
 import os
 import sys
+from logging.handlers import RotatingFileHandler
 
-from dods_match_stats import logger, config
+from dods_match_stats import logger, config, formatter
 from dods_match_stats.event_processor import EventProcessor
 from dods_match_stats.event_reader import EventReader
 from dods_match_stats.match_state_processor import MatchStateProcessor
@@ -67,11 +68,12 @@ def main(argv):
             sys.exit(2)
 
     if log_file is None:
-        file_handler = logging.FileHandler(config.get("LogFileSection", "logfile.path"))
-    else:
-        file_handler = logging.FileHandler(log_file)
+        log_file = config.get("LogFileSection", "logfile.path")
 
-    logger.addHandler(file_handler)
+    if log_file is not None and log_file.strip() != "":
+        rotating_file_handler = RotatingFileHandler(log_file, mode='a', maxBytes=(1024 * 1024 * 5), backupCount=5)
+        rotating_file_handler.setFormatter(formatter)
+        logger.addHandler(rotating_file_handler)
 
     logging.info("[Main] - dods-match-status started!")
 
