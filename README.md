@@ -46,21 +46,21 @@ dods-match-stats is licensed under the MIT License. A short and simple permissiv
  ## How to run
  ### Listening to remote logs using [config_file.properties](config_file.properties)
  Use this one if you want to track one game server only
- 
+   - Configure all properties in [config_file.properties](config_file.properties)
    - Execute command:
    ```
    python3 __main__.py
    ```
  ### Listening to remote logs using command line arguments
  Use this if you want to run multiple dods-match-stats instances for tracking multiple servers
- 
+   - Configure DatabaseSection properties in [config_file.properties](config_file.properties)
    - Execute command (without the brackets [ ]):
    ```
    python3 __main__.py -t [remote.adress.ip] -p localport -l "/path/to/output/log.file"  
    ```
  ### Run once providing server's log files
  Use this if you want to feed the database with past log files or missing log files. It accepts wild cards. For example "../logs/l*.log" 
- 
+   - Configure DatabaseSection properties in [config_file.properties](config_file.properties)
    - Execute command (without the brackets [ ]):
    ```
    python3 __main__.py -i "/path/to/input/log.file"  

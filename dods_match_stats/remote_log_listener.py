@@ -8,8 +8,6 @@ from . import config
 
 class RemoteLogListener(Thread):
     __END_OF_MESSAGE = bytearray('\x00\n', 'utf-8')
-    __port_from_config = int(config.get("LogListenerSection", "loglistener.port"))
-    __trusted_address_from_config = config.get("LogListenerSection", "gameserver.address")
 
     def __init__(self, ip, port):
         Thread.__init__(self)
@@ -19,8 +17,8 @@ class RemoteLogListener(Thread):
             self.__trusted_address = ip
             self.__port = int(port)
         else:
-            self.__trusted_address = RemoteLogListener.__trusted_address_from_config
-            self.__port = RemoteLogListener.__port_from_config
+            self.__trusted_address = config.get("LogListenerSection", "gameserver.address")
+            self.__port = int(config.get("LogListenerSection", "loglistener.port"))
         self.__server_socket.bind(("0.0.0.0", self.__port))
         self.__incomplete_message = None
         self.__message_queue = queue.Queue()
@@ -65,7 +63,7 @@ class RemoteLogListener(Thread):
             logging.debug("[RemoteLogListener] - Received: [" + buffer.decode("utf-8", errors='ignore')
                           + "] from " + address[0] + ":" + str(address[1]))
 
-            if address[0] == RemoteLogListener.__trusted_address_from_config:
+            if address[0] == self.__trusted_address:
                 RemoteLogListener.__process_buffer(self, buffer)
             else:
                 logging.warning("[RemoteLogListener] - Discarded: [" + buffer.decode("utf-8", errors='ignore')
