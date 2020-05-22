@@ -1,3 +1,7 @@
+import logging
+import time
+from functools import wraps
+
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, SmallInteger, Text
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -12,7 +16,33 @@ __engine = create_engine("mysql+pymysql://" + config.get("DatabaseSection", "dat
                          + "@" + config.get("DatabaseSection", "database.url")
                          + "/" + config.get("DatabaseSection", "database.schema")
                          + "?charset=utf8",
-                         echo=False, pool_recycle=10, encoding="utf-8")
+                         echo=False, pool_recycle=10, encoding="utf-8", pool_pre_ping=True)
+
+
+def retry(tries=4, delay=3, backoff=2):
+    def deco_retry(f):
+
+        @wraps(f)
+        def f_retry(*args, **kwargs):
+            mtries, mdelay = tries, delay
+            while mtries > 1:
+                try:
+                    return f(*args, **kwargs)
+                except Exception as e:
+                    if "This Session's transaction has been rolled back due to a previous exception during flush." in str(
+                            e):
+                        __session.rollback()
+                    msg = "[DatabaseConfig] %s, Retrying query in %d seconds..." % (str(e), mdelay)
+                    logging.warning(msg)
+                    time.sleep(mdelay)
+                    mtries -= 1
+                    mdelay *= backoff
+            return f(*args, **kwargs)
+
+        return f_retry
+
+    return deco_retry
+
 
 __Session = sessionmaker(bind=__engine)
 __session = __Session()
@@ -28,6 +58,16 @@ def get_session():
 
 def get_engine():
     return __engine
+
+
+@retry()
+def commit():
+    __session.commit()
+
+
+@retry()
+def query(table_class, value):
+    return __session.query(table_class).get(value)
 
 
 class TableStreakStat(__Base):
@@ -373,3 +413,9 @@ class TableMatch(__Base):
     team_axis_team_score = Column(SmallInteger, nullable=False)
     team_allies_tick_score = Column(SmallInteger, nullable=False)
     team_axis_tick_score = Column(SmallInteger, nullable=False)
+
+    player_match_list = relationship("TablePlayerMatch", lazy="select")
+    kill_stat_list = relationship("TableKillStat", lazy="select")
+    adr_stat_list = relationship("TableADRStat", lazy="select")
+    team_score_stat_list = relationship("TableTeamScoreStat", lazy="select")
+    streak_stat_list = relationship("TableStreakStat", lazy="select")

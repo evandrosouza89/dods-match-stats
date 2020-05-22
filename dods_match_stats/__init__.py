@@ -7,6 +7,8 @@ current_directory = os.path.dirname(__file__)
 config = configparser.RawConfigParser()
 config.read(os.path.join(os.path.split(current_directory)[0], "config_file.properties"))
 
+styles = open(os.path.join(os.path.split(current_directory)[0], "styles.css"), "r").read()
+
 formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-s %(message)s',
                               datefmt='%Y-%m-%d %H:%M:%S')
 

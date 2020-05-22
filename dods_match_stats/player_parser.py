@@ -47,6 +47,7 @@ class Player:
         self.team = team
         self.id64 = 76561197960265728 + int(player_id)
         self.profile = Player.__STEAM_PROFILE_BASE_URL + str(self.id64)
+        self.current_life = 0
 
     def __eq__(self, other):
         if isinstance(other, Player):

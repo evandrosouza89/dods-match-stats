@@ -10,12 +10,18 @@ from logging.handlers import RotatingFileHandler
 from dods_match_stats import logger, config, formatter
 from dods_match_stats.event_processor import EventProcessor
 from dods_match_stats.event_reader import EventReader
+from dods_match_stats.half_processor import HalfProcessor
+from dods_match_stats.html_writer import HtmlWriter
 from dods_match_stats.match_state_processor import MatchStateProcessor
 from dods_match_stats.match_stats_processor import MatchStatsProcessor
 from dods_match_stats.match_writer import MatchWriter
 from dods_match_stats.remote_log_listener import RemoteLogListener
+from dods_match_stats.topic_writer import TopicWriter
 
-__match_writer = MatchWriter()
+__topic_writer = TopicWriter()
+__html_writer = HtmlWriter(__topic_writer)
+__half_processor = HalfProcessor(__html_writer)
+__match_writer = MatchWriter(__half_processor)
 __match_stats_processor = MatchStatsProcessor(__match_writer)
 __match_state_processor = MatchStateProcessor(__match_stats_processor)
 __event_processor = EventProcessor(__match_state_processor)

@@ -15,7 +15,7 @@ class EventReader:
                 for line in contents:
                     self.__processor.process(line)
             except Exception as e:
-                logging.warning("[EventReader] - Exception occurred: [" + repr(e) + "]")
+                logging.error("[EventReader] - Exception occurred: [" + repr(e) + "]")
 
         else:  # UDP Listener
             while True:
@@ -23,4 +23,4 @@ class EventReader:
                     contents = self.__source.get_message()
                     self.__processor.process(contents)
                 except Exception as e:
-                    logging.warning("[EventReader] - Exception occurred: [" + repr(e) + "]")
+                    logging.error("[EventReader] - Exception occurred: [" + repr(e) + "]")

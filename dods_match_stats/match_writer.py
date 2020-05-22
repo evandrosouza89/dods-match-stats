@@ -6,14 +6,15 @@ from .database_config import TableMatch, get_base, get_engine, TablePlayer, Tabl
     TableSteamUserIdValidatedEvent, TableEnteredTheGameEvent, TableSuicideEvent, TableJoinedTeamEvent, \
     TableChangedNameEvent, TableSayEvent, TableSayTeamEvent, TableCapBlockEvent, TablePlayerCapturedLoc, \
     TableCapturedLocEvent, TableRoundWinEvent, TableTickScoreEvent, TableADRStat, TableKillStat, \
-    TableTeamScoreStat, TableWeaponStat, TableStreakStat, TableChangedRoleEvent
+    TableTeamScoreStat, TableWeaponStat, TableStreakStat, TableChangedRoleEvent, commit, query
 from .database_config import get_session
 from .team_action_event_parser import TeamEnum
 
 
 class MatchWriter:
 
-    def __init__(self):
+    def __init__(self, half_processor):
+        self.__half_processor = half_processor
         self.__session = get_session()
         get_base().metadata.create_all(get_engine())
 
@@ -28,14 +29,16 @@ class MatchWriter:
         logging.info("[MatchWriter] - Writing stats.")
         self.__write_stats(match, table_match)
 
-        self.__session.close()
         logging.info("[MatchWriter] - Writing done.")
+        self.__half_processor.process(table_match.id)
+
+        self.__session.close()
 
     def __write_match(self, match):
         table_match = map_match_to_table(match)
 
         self.__session.add(table_match)
-        self.__session.commit()
+        commit()
 
         return table_match
 
@@ -43,7 +46,7 @@ class MatchWriter:
         __table_player_match_list = []
 
         for player in match.spectators:
-            table_player = self.__session.query(TablePlayer).get(player.id)
+            table_player = query(TablePlayer, player.id)
 
             if table_player is None:
                 table_player = map_player_to_table(player)
@@ -56,7 +59,7 @@ class MatchWriter:
             __table_player_match_list.append(table_player_match)
 
         for player in match.team_allies_players:
-            table_player = self.__session.query(TablePlayer).get(player.id)
+            table_player = query(TablePlayer, player.id)
 
             if table_player is None:
                 table_player = map_player_to_table(player)
@@ -69,7 +72,7 @@ class MatchWriter:
             __table_player_match_list.append(table_player_match)
 
         for player in match.team_axis_players:
-            table_player = self.__session.query(TablePlayer).get(player.id)
+            table_player = query(TablePlayer, player.id)
 
             if table_player is None:
                 table_player = map_player_to_table(player)
@@ -82,11 +85,11 @@ class MatchWriter:
 
             __table_player_match_list.append(table_player_match)
 
-        self.__session.commit()
+        commit()
 
         self.__session.bulk_save_objects(__table_player_match_list)
 
-        self.__session.commit()
+        commit()
 
     def __write_events(self, match, table_match):
         __table_attack_event_list = []
@@ -174,7 +177,7 @@ class MatchWriter:
             __captured_loc_players[table_event] = event.player_list
             self.__session.add(table_event)
 
-        self.__session.commit()
+        commit()
 
         for table_event in __captured_loc_players.keys():
             for player in __captured_loc_players[table_event]:
@@ -208,7 +211,7 @@ class MatchWriter:
         self.__session.bulk_save_objects(__table_round_win_event_list)
         self.__session.bulk_save_objects(__table_tick_score_event_list)
 
-        self.__session.commit()
+        commit()
 
     def __write_stats(self, match, table_match):
         __table_adr_stat_list = []
@@ -243,7 +246,7 @@ class MatchWriter:
         self.__session.bulk_save_objects(__table_weapon_stat_list)
         self.__session.bulk_save_objects(__table_streak_stat_list)
 
-        self.__session.commit()
+        commit()
 
 
 def get_datetime_from_string(date_time):

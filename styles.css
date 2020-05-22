@@ -1,0 +1,92 @@
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,600);
+
+.teamsBox {
+    box-sizing: border-box;
+    width: 90%;
+    height: 15%;
+    display: flex;
+    justify-content: space-between;
+    margin: 1em;
+}
+
+.team {
+    position: relative;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    flex: 1 0 0px;
+}
+
+.day, .mapName {
+    text-align: center;
+    font-size: 18px;
+}
+
+.teamName, .score {
+    font-weight: bold;
+    font-size: 36px;
+}
+
+.hour {
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 36px;
+}
+
+.reportSeparator {
+    padding-bottom: 25px;
+}
+
+*, *:before, *:after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: url(paper.jpg);
+  font-family: "Courier New", Courier;
+  color: #444444;
+  font-size: 10pt;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+A:link {
+    color: #610000;
+    text-decoration: underline;
+}
+A:visited {
+    color: #610000;
+    text-decoration: underline;
+}
+
+table {
+    margin-top: 2px;
+    margin-bottom: 35px;
+    width: 90%;
+    border-spacing:0 5px;
+}
+
+th {
+    font-weight: bold;
+    border-bottom: 1px solid #000000;
+    text-align: center;
+}
+
+td {
+    text-align: center;
+}
+
+.playerNames {
+    width: 15%;
+    text-align: left;
+}
+
+.streaks {
+    width: 15%;
+    text-align: left;
+}
