@@ -1,5 +1,6 @@
 import re
 
+from .eof_event_parser import EOFEventParser
 from .p2p_action_event_parser import PlayerToPlayerActionEventParser
 from .player_action_event_parser import PlayerActionEventParser
 from .team_action_event_parser import TeamActionEventParser
@@ -16,11 +17,13 @@ class EventProcessor:
     __player_action_event_regex2 = re.compile(__TIME_STAMP_REGEX + r" \"([^\"]+)\" ([^(]+)(.*)")
     __team_action_event_regex = re.compile(__TIME_STAMP_REGEX + r" Team \"([^\"]+)\" ([^\"(]+) \"([^\"]+)\"(.*)")
     __world_action_event_regex = re.compile(__TIME_STAMP_REGEX + r" ([^\"(]+) \"([^\"]+)\"(.*)")
+    __eof_event_regex = re.compile(__TIME_STAMP_REGEX + r" (Log file closed\.)")
 
     __p2p_action_event_parser = PlayerToPlayerActionEventParser()
     __player_action_event_parser = PlayerActionEventParser()
     __team_action_event_parser = TeamActionEventParser()
     __world_action_event_parser = WorldActionEventParser()
+    __eof_event_parser = EOFEventParser()
 
     def __init__(self, match_state_processor):
         self.__match_state_processor = match_state_processor
@@ -83,3 +86,9 @@ class EventProcessor:
                 return EventProcessor.__world_action_event_parser.parse_event(time_stamp, raw_event, event,
                                                                               noun,
                                                                               properties)
+
+            m = EventProcessor.__eof_event_regex.search(raw_event)
+            if m:
+                ignored, time_stamp, event = m.groups()
+                time_stamp = time_stamp.strip()
+                return EventProcessor.__eof_event_parser.parse_event(time_stamp)

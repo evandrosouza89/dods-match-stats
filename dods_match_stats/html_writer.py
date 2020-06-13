@@ -131,7 +131,6 @@ class HtmlWriter:
         with tag("div"):
             with tag("div"):
                 doc.attr(klass="hour")
-                time = None
 
                 if start_time_stamp.hour < 10:
                     time = "0" + str(start_time_stamp.hour)

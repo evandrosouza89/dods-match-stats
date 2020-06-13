@@ -51,6 +51,17 @@ class WorldActionEventParser:
             else:
                 logging.warning("[WorldActionEventParser] - Event: [" + raw_event + "] discarded!")
 
+        elif EventEnum.SERVER_CVAR.value == event:
+            regex = re.compile(r"\"(.+?)\"")
+
+            m = regex.search(properties)
+
+            if m is not None:
+                value = m.groups()[0]
+            else:
+                value = ""
+            return ServerCvarEvent(time_stamp, noun, value)
+
         else:
             if event != "server_cvar:":
                 logging.warning("[WorldActionEventParser] - Event: [" + raw_event + "] discarded!")
@@ -61,6 +72,7 @@ class EventEnum(Enum):
     LOADING_MAP = "Loading map"
     STARTED_MAP = "Started map"
     WORLD_TRIGGERED = "World triggered"
+    SERVER_CVAR = "server_cvar:"
 
 
 class NounEnum(Enum):
@@ -72,6 +84,7 @@ class NounEnum(Enum):
     WARMUP_BEGIN = "Warmup_Begin"
     WARMUP_ENDS = "Warmup_Ends"
     GAME_OVER = "Game_Over"
+    SM_NEXTMAP = "sm_nextmap"
 
 
 class ReasonEnum(Enum):
@@ -99,6 +112,13 @@ class GameOverEvent(Event):
 class WorldTriggeredEvent(Event):
     def __init__(self, time_stamp):
         Event.__init__(self, time_stamp)
+
+
+class ServerCvarEvent(Event):
+    def __init__(self, time_stamp, server_cvar, value):
+        Event.__init__(self, time_stamp)
+        self.server_cvar = server_cvar
+        self.value = value
 
 
 class RoundStartEvent(WorldTriggeredEvent):

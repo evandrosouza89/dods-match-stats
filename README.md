@@ -19,6 +19,10 @@ What kind of stats does it generate and store?
 - Flag capture stats, including game score stats
 - Weapon stats
 
+What kind of output does it generate?
+- HTML report file
+- Integration with IPB board
+
 ## License
 dods-match-stats is licensed under the MIT License. A short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.
 
@@ -26,7 +30,7 @@ dods-match-stats is licensed under the MIT License. A short and simple permissiv
   - Day of Defeat Source game server
   - Python3
   - pymysql
-  - A MySQL database (configured with utf8-general_ci collation) 
+  - A MySQL database (configured with utf8-general_ci collation)
 
 ## Instalation
   - Clone or download zip file of this repository
@@ -56,7 +60,7 @@ dods-match-stats is licensed under the MIT License. A short and simple permissiv
    - Configure DatabaseSection properties in [config_file.properties](config_file.properties)
    - Execute command:
    ```
-   python3 __main__.py -t "remote.adress.ip" -p localport -l "/path/to/output/log.file"  
+   python3 __main__.py -t "remote.adress.ip" -p localport -l "/path/to/logdir" -n "instancename"
    ```
  ### Run once providing server's log files
  Use this if you want to feed the database with past log files or missing log files. It accepts wild cards. For example "../logs/l*.log" 

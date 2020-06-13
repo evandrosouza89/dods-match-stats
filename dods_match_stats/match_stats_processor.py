@@ -131,7 +131,9 @@ class ADRStatsProcessor(StatProcessor):
     def __process_attack_event(self, player_attacker, player_attacked, damage):
         adr_stat = self._parent.get_adr_stat(player_attacker)
 
-        if player_attacker.team != player_attacked.team:
+        if player_attacker == player_attacked:
+            adr_stat.self_damage += int(damage)
+        elif player_attacker.team != player_attacked.team:
             adr_stat.enemy_damage += int(damage)
         else:
             adr_stat.team_damage += int(damage)

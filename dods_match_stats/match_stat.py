@@ -11,6 +11,7 @@ class ADRStat(Stat):
         self.enemy_damage = 0
         self.average_damage = 0
         self.team_damage = 0
+        self.self_damage = 0
 
 
 class KillStat(Stat):

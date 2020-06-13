@@ -13,21 +13,30 @@ from .team_action_event_parser import TeamEnum
 
 class MatchWriter:
 
-    def __init__(self, half_processor):
+    def __init__(self, instance_name, half_processor):
+        self.__instance_name = instance_name
         self.__half_processor = half_processor
         self.__session = get_session()
         get_base().metadata.create_all(get_engine())
 
     def write(self, match):
-        table_match = self.__write_match(match)
 
-        logging.info("[MatchWriter] - Writing player list.")
-        self.__write_player_list(match, table_match)
-        logging.info("[MatchWriter] - Writing events.")
-        self.__write_events(match, table_match)
+        table_match = None
 
-        logging.info("[MatchWriter] - Writing stats.")
-        self.__write_stats(match, table_match)
+        try:
+            logging.info("[MatchWriter] - Writing match into database.")
+            table_match = self.__write_match(match)
+
+            logging.info("[MatchWriter] - Writing player list into database.")
+            self.__write_player_list(match, table_match)
+            logging.info("[MatchWriter] - Writing events into database.")
+            self.__write_events(match, table_match)
+
+            logging.info("[MatchWriter] - Writing stats into database.")
+            self.__write_stats(match, table_match)
+
+        except Exception as e:
+            logging.exception("[MatchWriter] - Exception occurred: [" + repr(e) + "]")
 
         logging.info("[MatchWriter] - Writing done.")
         self.__half_processor.process(table_match.id)
@@ -521,6 +530,7 @@ def map_adr_stat_to_table(adr_stat, table_match):
     table.enemy_damage = int(adr_stat.enemy_damage)
     table.average_damage = int(adr_stat.average_damage)
     table.team_damage = int(adr_stat.team_damage)
+    table.self_damage = int(adr_stat.self_damage)
 
     return table
 

@@ -18,39 +18,45 @@ from dods_match_stats.match_writer import MatchWriter
 from dods_match_stats.remote_log_listener import RemoteLogListener
 from dods_match_stats.topic_writer import TopicWriter
 
-__topic_writer = TopicWriter()
-__html_writer = HtmlWriter(__topic_writer)
-__half_processor = HalfProcessor(__html_writer)
-__match_writer = MatchWriter(__half_processor)
-__match_stats_processor = MatchStatsProcessor(__match_writer)
-__match_state_processor = MatchStateProcessor(__match_stats_processor)
-__event_processor = EventProcessor(__match_state_processor)
+
+def __init(instance_name):
+    topic_writer = TopicWriter()
+    html_writer = HtmlWriter(topic_writer)
+    half_processor = HalfProcessor(html_writer)
+    match_writer = MatchWriter(instance_name, half_processor)
+    match_stats_processor = MatchStatsProcessor(match_writer)
+    match_state_processor = MatchStateProcessor(match_stats_processor)
+    return EventProcessor(match_state_processor)
 
 
-def __read_from_logs_folder(input_dir):
+def __read_from_logs_folder(instance_name, input_dir):
     file_path_list = glob.glob(input_dir)
+    file_path_list.sort()
 
     for file_path in file_path_list:
         f = open(file_path, "r", encoding="utf-8", errors='replace')
-        __event_reader = EventReader(f, __event_processor)
-        __event_reader.read()
+        event_processor = __init(instance_name)
+        event_reader = EventReader(f, event_processor)
+        event_reader.read()
 
 
-def __read_from_remote_log_listener(trusted_ip_address, port):
+def __read_from_remote_log_listener(instance_name, trusted_ip_address, port):
     log_listener = RemoteLogListener(trusted_ip_address, port)
     log_listener.start()
-    __event_reader = EventReader(log_listener, __event_processor)
-    __event_reader.read()
+    event_processor = __init(instance_name)
+    event_reader = EventReader(log_listener, event_processor)
+    event_reader.read()
 
 
 def main(argv):
     trusted_ip_address = None
     port = None
-    log_file = None
+    log_dir = None
     input_dir = ""
+    instance_name = None
 
     try:
-        opts, args = getopt.getopt(argv, "hi:t:p:l:", ["input=", "trusted_ip_address=", "port="])
+        opts, args = getopt.getopt(argv, "hi:t:p:l:n:", ["input=", "trusted_ip_address=", "port="])
     except getopt.GetoptError:
         print("Invalid argument! try dods_match_stats.py -h for help")
         sys.exit(2)
@@ -58,8 +64,8 @@ def main(argv):
     for opt, arg in opts:
         if opt in ("-h", "--help"):
             print(
-                "Usage example: 'dods_match_stats.py -i <inputdir>' or (exclusive) 'dods_match_stats.py -t "
-                "192.168.1.10 -p 27016'")
+                "Usage example: 'dods_match_stats.py -i <inputdir>' or (exclusive) 'dods_match_stats.py "
+                "-t 34.95.187.157 -p 8001 -l /opt/dods-match-stats/logs/ -n dodsbr1'")
             sys.exit()
         elif opt in ("-i", "--input"):
             input_dir = arg
@@ -67,30 +73,40 @@ def main(argv):
             trusted_ip_address = arg
         elif opt in ("-p", "--port"):
             port = arg
-        elif opt in ("-l", "--log_file"):
-            log_file = arg
+        elif opt in ("-l", "--log_dir"):
+            log_dir = arg
+        elif opt in ("-n", "--instance_name"):
+            instance_name = arg
         else:
             print("Invalid argument! try dods_match_stats.py -h for help")
             sys.exit(2)
 
-    if log_file is None:
-        log_file = config.get("LogFileSection", "logfile.path")
+    if instance_name is None or instance_name.strip() == "":
+        instance_name = config.get("InstanceInfoSection", "instance.name")
 
-    if log_file is not None and log_file.strip() != "":
-        rotating_file_handler = RotatingFileHandler(log_file, mode='a', maxBytes=(1024 * 1024 * 5), backupCount=5)
-        rotating_file_handler.setFormatter(formatter)
-        logger.addHandler(rotating_file_handler)
+    if instance_name is None or instance_name.strip() == "":
+        print("Instance name must be provided!")
+        sys.exit(2)
 
-    logging.info("[Main] - dods-match-status started!")
+    if log_dir is None:
+        log_dir = os.path.join(config.get("InstanceInfoSection", "logdir.path"), "logs")
+
+    log_file = os.path.join(log_dir, instance_name + ".log")
+
+    rotating_file_handler = RotatingFileHandler(log_file, mode='a', maxBytes=(1024 * 1024 * 5), backupCount=5)
+    rotating_file_handler.setFormatter(formatter)
+    logger.addHandler(rotating_file_handler)
+
+    logging.info("[Main] - dods-match-status " + instance_name + " started!")
 
     if input_dir != "":
         if input_dir.endswith(os.sep):
             input_dir += "*.log"
         else:
             input_dir = os.path.join(input_dir, "*.log")
-        __read_from_logs_folder(input_dir)
+        __read_from_logs_folder(instance_name, input_dir)
     else:
-        __read_from_remote_log_listener(trusted_ip_address, port)
+        __read_from_remote_log_listener(instance_name, trusted_ip_address, port)
 
 
 if __name__ == "__main__":
