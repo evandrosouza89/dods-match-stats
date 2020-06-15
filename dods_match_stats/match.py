@@ -4,8 +4,8 @@ class Match:
         self.start_time_stamp = start_time_stamp
         self.end_time_stamp = end_time_stamp
         self.map_name = map_name
-        self.team_allies_team_score = None
-        self.team_axis_team_score = None
+        self.team_allies_team_score = 0
+        self.team_axis_team_score = 0
         self.team_allies_tick_score = None
         self.team_axis_tick_score = None
         self.team_allies_players = set()

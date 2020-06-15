@@ -26,7 +26,7 @@ class PlayerParser:
 
         player_id = 0
 
-        if id3 != "Console":
+        if id3 != "Console" and id3 != "BOT":
             regex = re.compile(r"\d:(.+)]")
 
             m = regex.search(id3)

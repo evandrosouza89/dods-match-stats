@@ -17,7 +17,6 @@ class MatchStateProcessor:
         self.__match_stats_processor = match_stats_processor
         self.__match = None
         self.__spectators = set()
-        self.__last_team_score_flag = False
         self.__last_round_events = []
 
     def process(self, event):
@@ -153,7 +152,6 @@ class MatchStateProcessor:
         if self.__match is not None:
             current_map_name = self.__match.map_name
         self.__match = None
-        self.__last_team_score_flag = False
         self.__last_round_events = []
         self.__match = Match(None, None, current_map_name)
         self.__match_stats_processor.reset_stats(self.__match)
@@ -174,9 +172,7 @@ class MatchStateProcessor:
 
     def __is_match_valid(self):
         if self.__is_match_started():
-            if None in (
-                    self.__match.team_allies_team_score, self.__match.team_allies_tick_score,
-                    self.__match.team_axis_team_score,
+            if None in (self.__match.team_allies_tick_score,
                     self.__match.team_axis_tick_score,
                     self.__match.end_time_stamp):
                 return False
