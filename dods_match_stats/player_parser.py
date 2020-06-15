@@ -24,14 +24,16 @@ class PlayerParser:
 
         name, uid, id3, team = m.groups()
 
-        player_id = 0
-
         if id3 != "Console" and id3 != "BOT":
             regex = re.compile(r"\d:(.+)]")
 
             m = regex.search(id3)
 
             player_id = m.groups()[0]
+
+        else:
+            player_id = 1
+            name = "TV"
 
         return Player(name, uid, id3, player_id, team)
 
@@ -45,9 +47,11 @@ class Player:
         self.id3 = id3
         self.id = player_id
         self.team = team
-        self.id64 = 76561197960265728 + int(player_id)
+        if player_id != 1:
+            self.id64 = 76561197960265728 + int(player_id)
+        else:
+            self.id64 = ""
         self.profile = Player.__STEAM_PROFILE_BASE_URL + str(self.id64)
-        self.current_life = 0
 
     def __eq__(self, other):
         if isinstance(other, Player):
