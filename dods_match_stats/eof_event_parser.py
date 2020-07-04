@@ -1,7 +1,7 @@
 from .event import Event
 
 
-# Covers log file end of file entry
+# Covers log file 'end of file' entry
 class EOFEventParser:
 
     @staticmethod

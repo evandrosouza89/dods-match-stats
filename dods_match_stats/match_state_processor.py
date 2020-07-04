@@ -1,5 +1,6 @@
 import logging
 
+from .bof_event_parser import BOFEvent
 from .eof_event_parser import EOFEvent
 from .match import Match
 from .p2p_action_event_parser import AttackEvent, KillEvent, DominationEvent, RevengeEvent
@@ -55,7 +56,7 @@ class MatchStateProcessor:
             if event.player.uid != "0":
                 self.__spectators.add(event.player)
 
-        elif type(event) == EOFEvent:
+        elif type(event) == EOFEvent or type(event) == BOFEvent:
             if self.__is_match_valid():
                 logging.info("[MatchStateProcessor] - Match ended! Now closing stats!")
                 self.__match.spectators = self.__spectators
@@ -173,8 +174,8 @@ class MatchStateProcessor:
     def __is_match_valid(self):
         if self.__is_match_started():
             if None in (self.__match.team_allies_tick_score,
-                    self.__match.team_axis_tick_score,
-                    self.__match.end_time_stamp):
+                        self.__match.team_axis_tick_score,
+                        self.__match.end_time_stamp):
                 return False
         else:
             return False
