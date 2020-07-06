@@ -18,7 +18,7 @@ class MatchStateProcessor:
         self.__match_stats_processor = match_stats_processor
         self.__match = None
         self.__spectators = set()
-        self.__last_round_events = []
+        self.__last_world_triggered_events = []
 
     def process(self, event):
         if type(event) in (MapLoadingEvent, StartedMapEvent):
@@ -38,19 +38,15 @@ class MatchStateProcessor:
 
         elif type(event) == RoundRestartEvent:
             self.__stop_match()
-            self.__last_round_events.append(event)
+            self.__last_world_triggered_events.append(event)
 
         elif type(event) == WarmupEndsEvent:
-            self.__last_round_events.append(event)
+            self.__last_world_triggered_events.append(event)
 
         elif type(event) == RoundStartEvent:
-            if len(self.__last_round_events) >= 2:
-                if type(self.__last_round_events[-1]) == WarmupEndsEvent:
-                    if type(self.__last_round_events[-2]) == RoundRestartEvent:
-                        self.__match.start_time_stamp = event.time_stamp
-                        self.__last_round_events = []
-
-                        logging.info("[MatchStateProcessor] - New match started! Now processing events.")
+            if any(isinstance(e, RoundRestartEvent) for e in self.__last_world_triggered_events) \
+                    or any(isinstance(e, WarmupEndsEvent) for e in self.__last_world_triggered_events):
+                self.__start_match(event.time_stamp)
 
         elif type(event) in (ConnectionEvent, EnteredTheGameEvent, SteamUserIdValidatedEvent):
             if event.player.uid != "0":
@@ -153,7 +149,7 @@ class MatchStateProcessor:
         if self.__match is not None:
             current_map_name = self.__match.map_name
         self.__match = None
-        self.__last_round_events = []
+        self.__last_world_triggered_events = []
         self.__match = Match(None, None, current_map_name)
         self.__match_stats_processor.reset_stats(self.__match)
 
@@ -192,3 +188,9 @@ class MatchStateProcessor:
                 self.__spectators.remove(player)
         elif player.uid != "0":
             self.__spectators.add(player)
+
+    def __start_match(self, time_stamp):
+        self.__match.start_time_stamp = time_stamp
+        self.__last_world_triggered_events = []
+
+        logging.info("[MatchStateProcessor] - New match started! Now processing events.")
