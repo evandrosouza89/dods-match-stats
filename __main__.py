@@ -19,8 +19,8 @@ from dods_match_stats.remote_log_listener import RemoteLogListener
 from dods_match_stats.topic_writer import TopicWriter
 
 
-def __init(instance_name):
-    topic_writer = TopicWriter()
+def __init(instance_name, topic_writer_enabled):
+    topic_writer = TopicWriter(topic_writer_enabled)
     html_writer = HtmlWriter(topic_writer)
     half_processor = HalfProcessor(html_writer)
     match_writer = MatchWriter(instance_name, half_processor)
@@ -29,21 +29,21 @@ def __init(instance_name):
     return EventProcessor(match_state_processor)
 
 
-def __read_from_logs_folder(instance_name, input_dir):
+def __read_from_logs_folder(instance_name, input_dir, topic_writer_enabled):
     file_path_list = glob.glob(input_dir)
     file_path_list.sort()
 
     for file_path in file_path_list:
         f = open(file_path, "r", encoding="utf-8", errors='replace')
-        event_processor = __init(instance_name)
+        event_processor = __init(instance_name, topic_writer_enabled)
         event_reader = EventReader(f, event_processor)
         event_reader.read()
 
 
-def __read_from_remote_log_listener(instance_name, trusted_ip_address, port):
+def __read_from_remote_log_listener(instance_name, trusted_ip_address, port, topic_writer_enabled):
     log_listener = RemoteLogListener(trusted_ip_address, port)
     log_listener.start()
-    event_processor = __init(instance_name)
+    event_processor = __init(instance_name, topic_writer_enabled)
     event_reader = EventReader(log_listener, event_processor)
     event_reader.read()
 
@@ -54,9 +54,10 @@ def main(argv):
     log_dir = None
     input_dir = ""
     instance_name = None
+    topic_writer_enabled = False
 
     try:
-        opts, args = getopt.getopt(argv, "hi:t:p:l:n:", ["input=", "trusted_ip_address=", "port="])
+        opts, args = getopt.getopt(argv, "hi:t:p:l:n:f:", ["input=", "trusted_ip_address=", "port="])
     except getopt.GetoptError:
         print("Invalid argument! try dods_match_stats.py -h for help")
         sys.exit(2)
@@ -65,7 +66,7 @@ def main(argv):
         if opt in ("-h", "--help"):
             print(
                 "Usage example: 'dods_match_stats.py -i <inputdir>' or (exclusive) 'dods_match_stats.py "
-                "-t 34.95.187.157 -p 8001 -l /opt/dods-match-stats/logs/ -n dodsbr1'")
+                "-t 34.95.187.157 -p 8001 -l /opt/dods-match-stats/logs/ -n dodsbr1 -f'")
             sys.exit()
         elif opt in ("-i", "--input"):
             input_dir = arg
@@ -77,6 +78,8 @@ def main(argv):
             log_dir = arg
         elif opt in ("-n", "--instance_name"):
             instance_name = arg
+        elif opt in ("-f", "--forum_enabled"):
+            topic_writer_enabled = True
         else:
             print("Invalid argument! try dods_match_stats.py -h for help")
             sys.exit(2)
@@ -104,9 +107,9 @@ def main(argv):
             input_dir += "*.log"
         else:
             input_dir = os.path.join(input_dir, "*.log")
-        __read_from_logs_folder(instance_name, input_dir)
+        __read_from_logs_folder(instance_name, input_dir, topic_writer_enabled)
     else:
-        __read_from_remote_log_listener(instance_name, trusted_ip_address, port)
+        __read_from_remote_log_listener(instance_name, trusted_ip_address, port, topic_writer_enabled)
 
 
 if __name__ == "__main__":
