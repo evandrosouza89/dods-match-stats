@@ -4,12 +4,13 @@ import os
 
 from yattag import Doc
 
-from . import styles, config
+from . import styles
 
 
 class HtmlWriter:
 
-    def __init__(self, topic_writer):
+    def __init__(self, output_dir, topic_writer):
+        self.__output_dir = output_dir
         self.__topic_writer = topic_writer
 
     def write(self, table_match_half1, table_match_half2):
@@ -45,13 +46,21 @@ class HtmlWriter:
             elif player.team == "Axis":
                 team1_players.add(player.player)
 
-        file_name = str(table_match_half1.start_time_stamp).replace("-", "_").replace(":", "_") + "_" + str(
+        file_name = str(table_match_half1.id) + "_" + str(table_match_half2.id) + "_" + str(
+            table_match_half1.start_time_stamp).replace("-", "_").replace(":", "_") + "_" + str(
             table_match_half1.id) + "_" + str(table_match_half2.id) + "@" + table_match_half1.map_name
 
-        HtmlWriter._write_html(file_name, map_name, table_match_half1, table_match_half2, spectators, team1_players,
+        HtmlWriter._write_html(self.__output_dir,
+                               file_name, map_name,
+                               table_match_half1,
+                               table_match_half2,
+                               spectators,
+                               team1_players,
                                team2_players,
-                               team1_total_score, team2_total_score,
-                               team1_tick_score, team2_tick_score)
+                               team1_total_score,
+                               team2_total_score,
+                               team1_tick_score,
+                               team2_tick_score)
 
         logging.info(
             "[HtmlWriter] - Writing " + file_name + " done")
@@ -60,9 +69,18 @@ class HtmlWriter:
         self.__topic_writer.write(file_name, topic_name)
 
     @staticmethod
-    def _write_html(file_name, map_name, match_half1, match_half2, spectators, team1_players, team2_players,
+    def _write_html(output_dir,
+                    file_name,
+                    map_name,
+                    match_half1,
+                    match_half2,
+                    spectators,
+                    team1_players,
+                    team2_players,
                     team1_total_score,
-                    team2_total_score, team1_tick_score, team2_tick_score):
+                    team2_total_score,
+                    team1_tick_score,
+                    team2_tick_score):
 
         doc, tag, text = Doc().tagtext()
 
@@ -98,8 +116,6 @@ class HtmlWriter:
                                                       match_half1.adr_stat_list + match_half2.adr_stat_list,
                                                       match_half1.team_score_stat_list + match_half2.team_score_stat_list,
                                                       match_half1.streak_stat_list + match_half2.streak_stat_list)
-
-        output_dir = config.get("HTMLPageOutputSection", "output.dir")
 
         if not output_dir.endswith(os.sep):
             output_dir += os.sep

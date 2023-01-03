@@ -4,42 +4,27 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
 
-from . import config
-
-__BASE = declarative_base()
-
-__ENGINE = create_engine("mysql+pymysql://" + config.get("DatabaseSection", "database.user")
-                         + ":" + config.get("DatabaseSection", "database.password")
-                         + "@" + config.get("DatabaseSection", "database.url")
-                         + "/" + config.get("DatabaseSection", "database.schema")
-                         + "?charset=utf8",
-                         echo=False, pool_recycle=10, encoding="utf-8", pool_pre_ping=True)
-
-__SESSION = sessionmaker(bind=__ENGINE)
-__session = __SESSION()
+_Base = declarative_base()
 
 
-def get_base():
-    return __BASE
+class DatabaseHelper:
+
+    def __init__(self, url, port, user, password, schema):
+        self.__engine = create_engine("mysql+pymysql://" + user
+                                      + ":" + password
+                                      + "@" + url
+                                      + ":" + str(port)
+                                      + "/" + schema
+                                      + "?charset=utf8",
+                                      echo=False, pool_recycle=10, encoding="utf-8", pool_pre_ping=True)
+
+        _Base.metadata.create_all(self.__engine)
+
+    def get_session(self):
+        return sessionmaker(bind=self.__engine)()
 
 
-def get_session():
-    return __session
-
-
-def get_engine():
-    return __ENGINE
-
-
-def commit():
-    __session.commit()
-
-
-def query(table_class, value):
-    return __session.query(table_class).get(value)
-
-
-class TableStreakStat(__BASE):
+class TableStreakStat(_Base):
     __tablename__ = "streak_stat"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -51,7 +36,7 @@ class TableStreakStat(__BASE):
     times = Column(SmallInteger, nullable=False)
 
 
-class TableWeaponStat(__BASE):
+class TableWeaponStat(_Base):
     __tablename__ = "weapon_stat"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -72,7 +57,7 @@ class TableWeaponStat(__BASE):
     deaths_by_head_shot = Column(SmallInteger, nullable=False)
 
 
-class TableTeamScoreStat(__BASE):
+class TableTeamScoreStat(_Base):
     __tablename__ = "team_score_stat"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -85,7 +70,7 @@ class TableTeamScoreStat(__BASE):
     blocks = Column(SmallInteger, nullable=False)
 
 
-class TableKillStat(__BASE):
+class TableKillStat(_Base):
     __tablename__ = "kill_stat"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -102,7 +87,7 @@ class TableKillStat(__BASE):
     deaths_by_head_shot = Column(SmallInteger, nullable=False)
 
 
-class TableADRStat(__BASE):
+class TableADRStat(_Base):
     __tablename__ = "adr_stat"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -116,7 +101,7 @@ class TableADRStat(__BASE):
     self_damage = Column(Integer, nullable=False)
 
 
-class TableTickScoreEvent(__BASE):
+class TableTickScoreEvent(_Base):
     __tablename__ = "tick_score_event"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -129,7 +114,7 @@ class TableTickScoreEvent(__BASE):
     num_players = Column(SmallInteger, nullable=False)
 
 
-class TableRoundWinEvent(__BASE):
+class TableRoundWinEvent(_Base):
     __tablename__ = "round_win_event"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -141,7 +126,7 @@ class TableRoundWinEvent(__BASE):
     num_players = Column(SmallInteger, nullable=False)
 
 
-class TablePlayerCapturedLoc(__BASE):
+class TablePlayerCapturedLoc(_Base):
     __tablename__ = "player_captured_loc"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -151,7 +136,7 @@ class TablePlayerCapturedLoc(__BASE):
     captured_loc = relationship("TableCapturedLocEvent", foreign_keys=captured_loc_id)
 
 
-class TableCapturedLocEvent(__BASE):
+class TableCapturedLocEvent(_Base):
     __tablename__ = "captured_loc_event"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -164,7 +149,7 @@ class TableCapturedLocEvent(__BASE):
     num_players = Column(SmallInteger, nullable=False)
 
 
-class TableCapBlockEvent(__BASE):
+class TableCapBlockEvent(_Base):
     __tablename__ = "cap_block_event"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -177,7 +162,7 @@ class TableCapBlockEvent(__BASE):
     flag_name = Column(String(64), nullable=False)
 
 
-class TableSayTeamEvent(__BASE):
+class TableSayTeamEvent(_Base):
     __tablename__ = "say_team_event"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -189,7 +174,7 @@ class TableSayTeamEvent(__BASE):
     message = Column(Text, nullable=False)
 
 
-class TableSayEvent(__BASE):
+class TableSayEvent(_Base):
     __tablename__ = "say_event"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -201,7 +186,7 @@ class TableSayEvent(__BASE):
     message = Column(Text, nullable=False)
 
 
-class TableChangedNameEvent(__BASE):
+class TableChangedNameEvent(_Base):
     __tablename__ = "changed_name_event"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -214,7 +199,7 @@ class TableChangedNameEvent(__BASE):
     to_name = Column(String(128), nullable=False)
 
 
-class TableChangedRoleEvent(__BASE):
+class TableChangedRoleEvent(_Base):
     __tablename__ = "changed_role_event"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -226,7 +211,7 @@ class TableChangedRoleEvent(__BASE):
     role = Column(String(32), nullable=False)
 
 
-class TableJoinedTeamEvent(__BASE):
+class TableJoinedTeamEvent(_Base):
     __tablename__ = "joined_team_event"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -238,7 +223,7 @@ class TableJoinedTeamEvent(__BASE):
     team = Column(String(16), nullable=False)
 
 
-class TableSuicideEvent(__BASE):
+class TableSuicideEvent(_Base):
     __tablename__ = "suicide_event"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -250,7 +235,7 @@ class TableSuicideEvent(__BASE):
     weapon = Column(String(32), nullable=False)
 
 
-class TableSteamUserIdValidatedEvent(__BASE):
+class TableSteamUserIdValidatedEvent(_Base):
     __tablename__ = "steam_user_id_validated_event"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -261,7 +246,7 @@ class TableSteamUserIdValidatedEvent(__BASE):
     player = relationship("TablePlayer", foreign_keys=player_id)
 
 
-class TableEnteredTheGameEvent(__BASE):
+class TableEnteredTheGameEvent(_Base):
     __tablename__ = "entered_the_game_event"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -272,7 +257,7 @@ class TableEnteredTheGameEvent(__BASE):
     player = relationship("TablePlayer", foreign_keys=player_id)
 
 
-class TableDisconnectionEvent(__BASE):
+class TableDisconnectionEvent(_Base):
     __tablename__ = "disconnection_event"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -283,7 +268,7 @@ class TableDisconnectionEvent(__BASE):
     player = relationship("TablePlayer", foreign_keys=player_id)
 
 
-class TableConnectionEvent(__BASE):
+class TableConnectionEvent(_Base):
     __tablename__ = "connection_event"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -295,7 +280,7 @@ class TableConnectionEvent(__BASE):
     ip_address = Column(String(128), nullable=False)
 
 
-class TableRevengeEvent(__BASE):
+class TableRevengeEvent(_Base):
     __tablename__ = "revenge_event"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -308,7 +293,7 @@ class TableRevengeEvent(__BASE):
     player_killed = relationship("TablePlayer", foreign_keys=player_killed_id)
 
 
-class TableDominationEvent(__BASE):
+class TableDominationEvent(_Base):
     __tablename__ = "domination_event"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -321,7 +306,7 @@ class TableDominationEvent(__BASE):
     player_dominated = relationship("TablePlayer", foreign_keys=player_dominated_id)
 
 
-class TableKillEvent(__BASE):
+class TableKillEvent(_Base):
     __tablename__ = "kill_event"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -335,7 +320,7 @@ class TableKillEvent(__BASE):
     weapon = Column(String(32), nullable=False)
 
 
-class TableAttackEvent(__BASE):
+class TableAttackEvent(_Base):
     __tablename__ = "attack_event"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -352,7 +337,7 @@ class TableAttackEvent(__BASE):
     hit_group = Column(String(16), nullable=False)
 
 
-class TablePlayerMatch(__BASE):
+class TablePlayerMatch(_Base):
     __tablename__ = "player_match"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -363,7 +348,7 @@ class TablePlayerMatch(__BASE):
     team = Column(String(16), nullable=False)
 
 
-class TablePlayer(__BASE):
+class TablePlayer(_Base):
     __tablename__ = "player"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -372,7 +357,7 @@ class TablePlayer(__BASE):
     profile = Column(String(128), nullable=False)
 
 
-class TableMatch(__BASE):
+class TableMatch(_Base):
     __tablename__ = "match"
 
     id = Column(Integer, primary_key=True, nullable=False)

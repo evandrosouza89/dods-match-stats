@@ -1,14 +1,14 @@
 import logging
 import time
 
-from dods_match_stats.database_config import get_session, TableMatch
+from dods_match_stats.database_helper import TableMatch
 
 
 class HalfProcessor:
 
-    def __init__(self, html_writer):
+    def __init__(self, database_helper, html_writer):
+        self.__db_helper = database_helper
         self.__html_writer = html_writer
-        self.__session = get_session()
         self.__first_half_id = None
 
     def process(self, table_match_id):
@@ -19,14 +19,15 @@ class HalfProcessor:
 
             logging.info("[HalfProcessor] - Match identified as first-half.")
         else:
-            first_half = self.__session.query(TableMatch).get(self.__first_half_id)
-            table_match = self.__session.query(TableMatch).get(table_match_id)
-            if HalfProcessor.__check_map_name(first_half, table_match):
-                if HalfProcessor.__check_time_difference(first_half, table_match):
-                    if HalfProcessor.__check_players_equality(first_half, table_match):
+            session = self.__db_helper.get_session()
+            match_first_half_item = session.query(TableMatch).get(self.__first_half_id)
+            match_item = session.query(TableMatch).get(table_match_id)
+            if HalfProcessor.__check_map_name(match_first_half_item, match_item):
+                if HalfProcessor.__check_time_difference(match_first_half_item, match_item):
+                    if HalfProcessor.__check_players_equality(match_first_half_item, match_item):
                         logging.info("[HalfProcessor] - Match identified as second-half.")
 
-                        self.__html_writer.write(first_half, table_match)
+                        self.__html_writer.write(match_first_half_item, match_item)
                         self.__first_half_id = None
                     else:
                         logging.info(
@@ -44,7 +45,7 @@ class HalfProcessor:
                     "Reason: map changed")
                 self.__first_half_id = table_match_id
 
-        self.__session.close()
+            session.close()
 
     @staticmethod
     def __check_map_name(first_half, table_match):

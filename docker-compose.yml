@@ -1,0 +1,51 @@
+version: '3.9'
+
+services:
+  app:
+    build: .
+    environment:
+      - DMS_SV_IP
+      - DMS_PORT
+      - DMS_DB_URL
+      - DMS_DB_PORT
+      - DMS_DB_USR
+      - DMS_DB_PW
+      - DMS_DB_SCH
+    #cap_add:
+    #  - ALL
+    #command: conntrack -D -p UDP
+    #command: start dods-match-stats.service
+    #volumes:
+    #  - /var/www/dods-match-stats/html:/var/www/dods-match-stats/html
+    ports:
+      - ${DMS_PORT}:${DMS_PORT}/udp
+    #networks:
+    #  - database
+    #links:
+    #  - mysql
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8
+    ports:
+      - ${DMS_DB_PORT}:${DMS_DB_PORT}
+    #volumes:
+    #  - ~/apps/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DMS_DB_PW}
+      - MYSQL_PASSWORD=${DMS_DB_PW}
+      - MYSQL_USER=${DMS_DB_USR}
+      - MYSQL_DATABASE=${DMS_DB_SCH}
+    #networks:
+    #  - database
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+    restart: always
+
+#networks:
+#  database:
+#    external: true

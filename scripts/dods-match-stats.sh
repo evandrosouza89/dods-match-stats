@@ -1,0 +1,1 @@
+python3 "$DMS_HOME"/__main__.py -t "$DMS_SV_IP" -p "$DMS_PORT" -l "$DMS_HOME"/logs -n "$1" -o "$DMS_HTML_OUTPUT" -d "$DMS_DB_URL" -q "$DMS_DB_PORT" -u "$DMS_DB_USR" -w "$DMS_DB_PW" -s "$DMS_DB_SCH"

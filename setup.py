@@ -12,6 +12,8 @@ setup(
     install_requires=[
         'setuptools',
         'configparser',
-        'SQLAlchemy'
+        'SQLAlchemy',
+        'yattag',
+        'requests'
     ],
 )
