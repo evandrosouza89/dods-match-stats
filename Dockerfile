@@ -17,4 +17,6 @@ COPY /assets/paper.jpg $DMS_HTML_OUTPUT
 
 RUN mkdir $DMS_HOME/logs
 
+RUN chmod u=rwx $DMS_HOME/scripts/dods-match-stats.sh
+
 CMD /bin/bash $DMS_HOME/scripts/dods-match-stats.sh dms-instance-1
