@@ -11,6 +11,8 @@ services:
       - DMS_DB_USR
       - DMS_DB_PW
       - DMS_DB_SCH
+      - DMS_HOME
+      - DMS_HTML_OUTPUT
     volumes:
       - ${DMS_HTML_OUTPUT}:${DMS_HTML_OUTPUT}
     ports:
