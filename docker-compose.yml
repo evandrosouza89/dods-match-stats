@@ -17,7 +17,7 @@ services:
       - ${DMS_HTML_OUTPUT}:${DMS_HTML_OUTPUT}
     ports:
       - ${DMS_PORT}:${DMS_PORT}/udp
-    command: /bin/bash ${DMS_HOME}/scripts/dods-match-stats.sh dms-instance-1
+    command: cp ${DMS_HOME}/assets/paper.jpg ${DMS_HTML_OUTPUT};/bin/bash ${DMS_HOME}/scripts/dods-match-stats.sh dms-instance-1
     #networks:
     #  - database
     #links:
