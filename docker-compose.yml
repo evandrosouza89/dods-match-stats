@@ -12,10 +12,10 @@ services:
       - DMS_DB_PW
       - DMS_DB_SCH
     volumes:
-      - /var/www/dods-match-stats/html:/var/www/dods-match-stats/html
+      - ${DMS_HTML_OUTPUT}:${DMS_HTML_OUTPUT}
     ports:
       - ${DMS_PORT}:${DMS_PORT}/udp
-    command: /bin/bash $DMS_HOME/scripts/dods-match-stats.sh dms-instance-1
+    command: /bin/bash ${DMS_HOME}/scripts/dods-match-stats.sh dms-instance-1
     #networks:
     #  - database
     #links:
