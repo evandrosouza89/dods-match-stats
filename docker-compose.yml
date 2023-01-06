@@ -11,14 +11,11 @@ services:
       - DMS_DB_USR
       - DMS_DB_PW
       - DMS_DB_SCH
-    #cap_add:
-    #  - ALL
-    #command: conntrack -D -p UDP
-    #command: start dods-match-stats.service
-    #volumes:
-    #  - /var/www/dods-match-stats/html:/var/www/dods-match-stats/html
+    volumes:
+      - /var/www/dods-match-stats/html:/var/www/dods-match-stats/html
     ports:
       - ${DMS_PORT}:${DMS_PORT}/udp
+    command: /bin/bash $DMS_HOME/scripts/dods-match-stats.sh dms-instance-1
     #networks:
     #  - database
     #links:
@@ -31,8 +28,8 @@ services:
     image: mysql:8
     ports:
       - ${DMS_DB_PORT}:${DMS_DB_PORT}
-    #volumes:
-    #  - ~/apps/mysql:/var/lib/mysql
+    volumes:
+      - ~/apps/mysql:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=${DMS_DB_PW}
       - MYSQL_PASSWORD=${DMS_DB_PW}

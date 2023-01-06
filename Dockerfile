@@ -17,8 +17,4 @@ COPY /assets/banner.jpg $DMS_HTML_OUTPUT
 
 RUN mkdir $DMS_HOME/logs
 
-#RUN apt-get update
-#RUN apt-get -y install conntrack
-#CMD conntrack -D -p UDP;/bin/bash $DMS_HOME/scripts/dods-match-stats.sh dms-instance-1
-
 CMD /bin/bash $DMS_HOME/scripts/dods-match-stats.sh dms-instance-1
