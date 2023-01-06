@@ -13,7 +13,7 @@ RUN python3 -m pip install cryptography
 COPY . .
 
 RUN mkdir -p $DMS_HTML_OUTPUT
-COPY /assets/banner.jpg $DMS_HTML_OUTPUT
+COPY /assets/paper.jpg $DMS_HTML_OUTPUT
 
 RUN mkdir $DMS_HOME/logs
 
