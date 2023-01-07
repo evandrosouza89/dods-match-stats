@@ -10,7 +10,7 @@ DMS_NETWORK="dms-network"
 
 docker network create "$DMS_NETWORK"
 
-docker run --name "$DMS_DB_URL" -P -d -e MYSQL_ROOT_PASSWORD="$DMS_DB_PW" -e MYSQL_USER="$DMS_DB_USR" -e MYSQL_PASSWORD="$DMS_DB_PW" -e MYSQL_DATABASE="$DMS_DB_SCH" --network="$DMS_NETWORK" mysql:8
+docker run --name "$DMS_DB_URL" -P -p "$DMS_DB_PORT":"$DMS_DB_PORT" -d -e MYSQL_ROOT_PASSWORD="$DMS_DB_PW" -e MYSQL_USER="$DMS_DB_USR" -e MYSQL_PASSWORD="$DMS_DB_PW" -e MYSQL_DATABASE="$DMS_DB_SCH" --network="$DMS_NETWORK" mysql:8
 
 sleep 10
 
