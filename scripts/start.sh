@@ -39,7 +39,7 @@ while read -r line; do
   ip=${entries[0]}
   port=${entries[1]}
 
-  docker run --name dods-match-stats"$port" -d -p "$port":"$port"/udp -e DMS_SV_IP="$ip" -e DMS_PORT="$port" -e DMS_DB_URL="$DMS_DB_URL" -e DMS_DB_PORT="$DMS_DB_PORT" -e DMS_DB_USR="$DMS_DB_USR" -e DMS_DB_PW="$DMS_DB_PW" -e DMS_DB_SCH="$DMS_DB_SCH" --network="$DMS_NETWORK" dods-match-stats
+  docker run --name dods-match-stats"$port" -d -P -p "$port":"$port"/udp -e DMS_SV_IP="$ip" -e DMS_PORT="$port" -e DMS_DB_URL="$DMS_DB_URL" -e DMS_DB_PORT="$DMS_DB_PORT" -e DMS_DB_USR="$DMS_DB_USR" -e DMS_DB_PW="$DMS_DB_PW" -e DMS_DB_SCH="$DMS_DB_SCH" --network="$DMS_NETWORK" dods-match-stats
 
   sleep 3
 
