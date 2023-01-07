@@ -1,5 +1,6 @@
 FROM python:3
 
+ENV DMS_PORT=8001
 ENV DMS_HOME=/opt/dods-match-stats
 ENV DMS_HTML_OUTPUT=/var/www/dods-match-stats/html
 
@@ -18,5 +19,7 @@ COPY /assets/paper.jpg $DMS_HTML_OUTPUT
 RUN mkdir $DMS_HOME/logs
 
 RUN chmod u=rwx $DMS_HOME/scripts/dods-match-stats.sh
+
+EXPOSE $DMS_PORT/udp
 
 CMD /bin/bash $DMS_HOME/scripts/dods-match-stats.sh dms-instance-1
