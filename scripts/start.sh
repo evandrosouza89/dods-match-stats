@@ -8,7 +8,7 @@ DMS_DB_SCH="dods-match-stats"
 DMS_NETWORK="dms-network"
 
 function getContainerHealth {
-  docker inspect --format "{{.State.Health.Status}}" $1
+  docker inspect --format "{{.State.Health.Status}}" "$1"
 }
 
 function waitContainer {
@@ -26,9 +26,9 @@ function waitContainer {
 
 docker network create "$DMS_NETWORK"
 
-docker run --name "$DMS_DB_URL" -P -p "$DMS_DB_PORT":"$DMS_DB_PORT" -d -e MYSQL_ROOT_PASSWORD="$DMS_DB_PW" -e MYSQL_USER="$DMS_DB_USR" -e MYSQL_PASSWORD="$DMS_DB_PW" -e MYSQL_DATABASE="$DMS_DB_SCH" --network="$DMS_NETWORK" --health-cmd='mysqladmin ping --silent' mysql:8
+docker run --name "$DMS_DB_URL" -P -p "$DMS_DB_PORT":"$DMS_DB_PORT" -d -e MYSQL_ROOT_PASSWORD="$DMS_DB_PW" -e MYSQL_USER="$DMS_DB_USR" -e MYSQL_PASSWORD="$DMS_DB_PW" -e MYSQL_DATABASE="$DMS_DB_SCH" --network="$DMS_NETWORK" --health-cmd="mysqladmin ping --silent" mysql:8
 
-waitContainer mysql
+waitContainer "$DMS_DB_URL"
 
 FILE_NAME='servers.txt'
 
