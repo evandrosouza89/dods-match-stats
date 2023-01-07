@@ -1,7 +1,7 @@
 FROM python:3
 
-ARG DMS_HOME=/opt/dods-match-stats
-ARG DMS_HTML_OUTPUT=/var/www/dods-match-stats/html
+ENV DMS_HOME=/opt/dods-match-stats
+ENV DMS_HTML_OUTPUT=/var/www/dods-match-stats/html
 
 WORKDIR $DMS_HOME
 

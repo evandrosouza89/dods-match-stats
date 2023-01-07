@@ -2,19 +2,17 @@ version: '3.9'
 
 services:
   app:
-    build:
-      context: .
-      args:
-        - DMS_DB_URL=${DMS_DB_URL}
-        - DMS_DB_PORT=${DMS_DB_PORT}
-        - DMS_DB_USR=${DMS_DB_USR}
-        - DMS_DB_PW=${DMS_DB_PW}
-        - DMS_DB_SCH=${DMS_DB_SCH}
-        - DMS_HOME=${DMS_HOME}
-        - DMS_HTML_OUTPUT=${DMS_HTML_OUTPUT}
+    build: .
     environment:
-      - DMS_SV_IP
-      - DMS_PORT
+      DMS_SV_IP:
+      DMS_PORT:
+      DMS_DB_URL: "${DMS_DB_URL:-db}"
+      DMS_DB_PORT: "${DMS_DB_PORT:-3306}"
+      DMS_DB_USR: "${DMS_DB_USR:-secret}"
+      DMS_DB_PW: "${DMS_DB_PW:-secret}"
+      DMS_DB_SCH: "${DMS_DB_SCH:-dods-match-stats}"
+      DMS_HOME: "${DMS_HOME:-/opt/dods-match-stats}"
+      DMS_HTML_OUTPUT: "${DMS_HTML_OUTPUT:-/var/www/dods-match-stats/html}"
     volumes:
       - ${DMS_HTML_OUTPUT}:${DMS_HTML_OUTPUT}
     ports:
