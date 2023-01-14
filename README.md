@@ -1,78 +1,88 @@
 <p align="center">
-  <img src="/assets/banner.jpg">
+  <a href="https://store.steampowered.com/app/300/Day_of_Defeat_Source/">
+  <img src="/assets/banner.jpg">
 </p>
 
-
 # DODS-MATCH-STATS
-A HL Log Standard parser and competitive match stats generator for Day of Defeat Source game.
+  A HL Log Standard parser and competitive match stats generator for [Day of Defeat Source game](https://store.steampowered.com/app/300/Day_of_Defeat_Source/).
 
-What kind of events does it store?
-Every game event that makes sense in a competitive match, including:
+  What kind of events does it parse?
 
-- Kills / Deaths / Attacks / Flag captures / Flag blocks / Round win events / Tick scores / Chat messages / Connections / Disconnections / Name changes / Role changes / Domination events / Revenge events / Joined team events / Suicide events
+  Every game event that makes sense in a competitive match, including:
 
-What kind of stats does it generate and store?
+  - Kills / Deaths / Attacks / Suicide
+  - Flag captures / Flag blocks
+  - Round win events / Tick scores
+  - Chat messages
+  - Player connections / Player disconnections 
+  - Player name changes / Player Role changes / Player team changes 
+  - Domination events / Revenge events
 
-- Total Enemy damage / Total team damage / Average damage per life
-- Kills / Deaths / Team kills / Team killed / Suicides / Headshots
-- Streak stats
-- Flag capture stats, including game score stats
-- Weapon stats
+  What kind of stats does it generate?
 
-What kind of output does it generate?
-- HTML report file
-- Integration with IPB board
+  - Total Enemy damage / Total team damage / Average damage per life
+  - Kills / Deaths / Team kills / Team killed / Suicides / Headshots
+  - Streak stats
+  - Flag capture stats, including game score stats
+  - Weapon stats
 
-## License
-dods-match-stats is licensed under the MIT License. A short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.
+  What kind of output does it generate?
+  - HTML report file
+  - Integration with [IPB board](https://invisioncommunity.com/files/)
+  
+## How this works
+  This parser flow can be divided in three main scopes: 
+  - Game server scope
+  - Docker host scope
+  - Docker container scope
+
+<p align="center">
+  <img src="/assets/flowchart.jpg">
+  <figcaption>From the left to the right, game servers generate UDP packets containing game events logs, which are received and routed by the Docker host. The Docker host manages one MySQL database container and at least one dods-match-stats parser container. The dods-match-stats containers receive and process the game events logs to calculate the score of the teams and extract individual stats of the players who played the match. In the end of the process, the stats are persisted in the database container and a html report is generated in the docker host.</figcaption>
+</p>
+
+## What are war reports?
+  Below two output examples of dods-match-stats parser job:
+
+<p align="center">
+  <a href="https://htmlpreview.github.io/?https://github.com/evandrosouza89/dods-match-stats/blob/master/assets/demo1.html">
+  <img src="/assets/demo1.jpg">
+</p>
+  
+  <p align="center">
+  <a href="https://htmlpreview.github.io/?https://github.com/evandrosouza89/dods-match-stats/blob/master/assets/demo2.html">
+  <img src="/assets/demo2.jpg">
+</p>
 
 ## Requirements
   - Day of Defeat Source game server
-  - Python3
-  - pymysql
-  - A MySQL database (configured with utf8-general_ci collation)
-
-## Instalation
-  - Clone or download zip file of this repository
-  - Install **Python3** for your current SO
-  - Install **pip3** for your current SO
-  - Navigate to the folder where you cloned/zip-extracted this project
+  - Linux host with [Docker tool](https://www.docker.com/) installed
+    
+## Installation
+  - Install [**Docker**](https://www.docker.com/) and start it
+  - [Download dods-match-stats scripts](https://github.com/evandrosouza89/dods-match-stats/raw/f5e00c622c2a5f583655637a2b38311a34d9c38a/assets/dods-match-stats.v1.0.zip)
+  - Edit **servers.txt**, remove the example entries and carefully fulfill all the fields with one <game server ip>;<desired dods-match-stats port> per line. Notice that if the game server isn`t in the same machine as the dods-matchs-stats you will have to open your **loglistener.port** UDP port for incoming conections in your network/firewall
+  
+## How to run
   - Execute command:
-  ```
-  pip3 install -r requirements.txt
-  ```
-  - Execute command: 
-  ```
-  python3 -m pip install PyMySQL
-  ```
-  - Edit **config_file.properties** and carefully fulfill all the fields with correct information, remember that, if the game server isn`t in the same machine as the dods-matchs-stats you will have to open your **loglistener.port** UDP port for incoming conections in your network/firewall
-  
- ## How to run
- ### Listening to remote logs using [config_file.properties](config_file.properties)
- Use this one if you want to track one game server only
-   - Configure all properties in [config_file.properties](config_file.properties)
-   - Execute command:
-   ```
-   python3 __main__.py
-   ```
- ### Listening to remote logs using command line arguments
- Use this if you want to run multiple dods-match-stats instances for tracking multiple servers
-   - Configure DatabaseSection properties in [config_file.properties](config_file.properties)
-   - Execute command:
-   ```
-   python3 __main__.py -t "remote.adress.ip" -p localport -l "/path/to/logdir" -n "instancename"
-   ```
- ### Run once providing server's log files
- Use this if you want to feed the database with past log files or missing log files. It accepts wild cards. For example "../logs/l*.log" 
-   - Configure DatabaseSection properties in [config_file.properties](config_file.properties)
-   - Execute command:
-   ```
-   python3 __main__.py -i "/path/to/input/log.file"  
-   ``` 
- ## How do I see the generated match content?
-   - Check your provided MySQL database, everything will be there.
- 
- ## Quick notes about this program
-   - It only stores events and stats of valid matches.
-   
-   - What is a valid match? A valid match is any match that uses the game built-in war-mode settings. After the program capture a sequence of valid events it will start recording the match events and at the end of the match it will store it on provided database.
+  ```
+  sh start.sh
+  ```
+ 
+## How to stop
+  - Execute command:
+  ```
+  sh stop.sh
+  ``` 
+ 
+## Where do I see the generated match content?
+  - This app outputs war reports at ```/var/www/dods-match-stats/html folder```
+  - Check your provided MySQL database, everything will be there
+ 
+## Quick notes about this program
+  - It only stores events and stats of valid matches
+   
+  - What is a valid match? A valid match is any match that uses the game built-in war-mode settings. After the program capture a sequence of valid events it will start recording the match events and at the end of the match it will store it on provided database
+    
+## License
+  dods-match-stats is licensed under the MIT License. A short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.
