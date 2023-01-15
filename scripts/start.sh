@@ -85,13 +85,13 @@ while read -r line; do
                -e DMS_DB_SCH="$DMS_DB_SCH" \
                --network="$DMS_NETWORK" \
                -v "$DMS_HTML_OUTPUT":"$DMS_HTML_OUTPUT" \
-               dods-match-stats
+               evandrosouza89/dods-match-stats:latest
 
   docker exec dods-match-stats"$port" cp "$DMS_HOME"/assets/paper.jpg "$DMS_HTML_OUTPUT"
 
   sleep 3
 
-  echo "Log parser started at UDP port $port""!"
+  echo "Game log parser started at UDP port $port""!"
 
 done <$INPUT_FILE
 
