@@ -62,6 +62,7 @@
   - Install [Docker](https://www.docker.com/) and start it
   - [Download dods-match-stats scripts](https://github.com/evandrosouza89/dods-match-stats/raw/master/assets/dods-match-stats.v1.0.zip)
   - Edit **servers.txt**, remove the example entries and carefully fulfill all the fields with one <game server ip>;<desired dods-match-stats port> per line. Notice that if the game server isn`t in the same machine as the dods-matchs-stats you will have to open your UDP <desired dods-match-stats port> for incoming conections in your network/firewall
+ - In your game server configuration file, add  ```logaddress_add <dodstats_ip>:<dodstats_port>``` command
   
 ## How to run
   - Execute command:
