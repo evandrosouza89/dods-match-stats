@@ -46,8 +46,7 @@ class HtmlWriter:
             elif player.team == "Axis":
                 team1_players.add(player.player)
 
-        file_name = str(table_match_half1.id) + "_" + str(table_match_half2.id) + "_" + str(
-            table_match_half1.start_time_stamp).replace("-", "_").replace(":", "_") + "_" + str(
+        file_name = str(table_match_half1.start_time_stamp).replace("-", "_").replace(":", "_") + "_" + str(
             table_match_half1.id) + "_" + str(table_match_half2.id) + "@" + table_match_half1.map_name
 
         HtmlWriter._write_html(self.__output_dir,
