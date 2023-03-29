@@ -18,9 +18,6 @@ class MatchStatsProcessor:
         for stat_processor in self.__stat_processor_list:
             stat_processor.process(event)
 
-        for stat_processor in self.__stat_processor_list:
-            stat_processor.update(event)
-
     def __reset(self):
         self.__match = None
 
@@ -72,6 +69,9 @@ class MatchStatsProcessor:
 
         return adr_stat
 
+    def get_adr_stats(self):
+        return self.__adr_stats
+
     def get_team_score_stat(self, player):
         team_score_stat = self.__team_score_stats.get(player.id3)
 
@@ -112,9 +112,6 @@ class StatProcessor(object):
     def process(self, event):
         pass
 
-    def update(self, event):
-        pass
-
 
 class ADRStatsProcessor(StatProcessor):
     def __init__(self, parent):
@@ -123,10 +120,8 @@ class ADRStatsProcessor(StatProcessor):
     def process(self, event):
         if type(event) == AttackEvent:
             self.__process_attack_event(event.player_attacker, event.player_attacked, event.damage)
-
-    def update(self, event):
-        if type(event) == KillEvent:
-            self.__update_by_kill_event(event.player_killed)
+        elif type(event) == GameOverEvent:
+            self.__process_game_over_event()
 
     def __process_attack_event(self, player_attacker, player_attacked, damage):
         adr_stat = self._parent.get_adr_stat(player_attacker)
@@ -138,10 +133,10 @@ class ADRStatsProcessor(StatProcessor):
         else:
             adr_stat.team_damage += int(damage)
 
-    def __update_by_kill_event(self, player_killed):
-        adr_stat = self._parent.get_adr_stat(player_killed)
-        kill_stat = self._parent.get_kill_stat(player_killed)
-        adr_stat.average_damage = adr_stat.enemy_damage / kill_stat.deaths
+    def __process_game_over_event(self):
+        for adr_stat in self._parent.get_adr_stats().items():
+            kill_stat = self._parent.get_kill_stat(adr_stat[1].player)
+            adr_stat[1].average_damage = adr_stat[1].enemy_damage / kill_stat.deaths
 
 
 class KillStatsProcessor(StatProcessor):

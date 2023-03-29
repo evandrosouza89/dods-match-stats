@@ -250,7 +250,7 @@ class HtmlWriter:
                         hs += kill_stat.kills_by_head_shot
                     for adr_stat in found_adr_stat_list:
                         ed += adr_stat.enemy_damage
-                        ad += adr_stat.average_damage
+                        ad += int(adr_stat.average_damage / 2)
                         td += adr_stat.team_damage
                     for team_score_stat in found_team_score_stat_list:
                         sc += team_score_stat.scores
