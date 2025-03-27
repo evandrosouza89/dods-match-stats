@@ -1,14 +1,17 @@
 import logging
 import time
 
-from dods_match_stats.database_helper import TableMatch
+from src.database_helper import TableMatch
+from src.utils import Utils
 
 
 class HalfProcessor:
 
-    def __init__(self, database_helper, html_writer):
+    def __init__(self, database_helper, html_writer, topic_writer, discord_writer):
         self.__db_helper = database_helper
         self.__html_writer = html_writer
+        self.__topic_writer = topic_writer
+        self.__discord_writer = discord_writer
         self.__first_half_id = None
 
     def process(self, table_match_id):
@@ -25,10 +28,15 @@ class HalfProcessor:
             if HalfProcessor.__check_map_name(match_first_half_item, match_item):
                 if HalfProcessor.__check_time_difference(match_first_half_item, match_item):
                     if HalfProcessor.__check_players_equality(match_first_half_item, match_item):
+
                         logging.info("[HalfProcessor] - Match identified as second-half.")
 
                         self.__html_writer.write(match_first_half_item, match_item)
+
+                        self.perform_post_file_writing_actions(match_first_half_item, match_item)
+
                         self.__first_half_id = None
+
                     else:
                         logging.info(
                             "[HalfProcessor] - Last half discarded and match identified as first half. "
@@ -46,6 +54,15 @@ class HalfProcessor:
                 self.__first_half_id = table_match_id
 
             session.close()
+
+    def perform_post_file_writing_actions(self, table_match_half1, table_match_half2):
+
+        topic_name = str(table_match_half1.start_time_stamp) + "@" + table_match_half1.map_name
+        file_name = Utils.generate_file_name(table_match_half1, table_match_half2)
+
+        self.__topic_writer.write(file_name, topic_name)
+
+        self.__discord_writer.write(file_name)
 
     @staticmethod
     def __check_map_name(first_half, table_match):

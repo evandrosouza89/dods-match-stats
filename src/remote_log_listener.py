@@ -15,6 +15,7 @@ class RemoteLogListener(Thread):
         self.__server_socket.bind(("0.0.0.0", self.__port))
         self.__incomplete_message = None
         self.__message_queue = queue.Queue()
+        self.__connected = False
 
     def get_message(self):
         return self.__message_queue.get()
@@ -44,6 +45,11 @@ class RemoteLogListener(Thread):
 
             for message in message_list:
                 if message != "":
+
+                    if not self.__connected:
+                        logging.info("[RemoteLogListener] - Game server connected!")
+                        self.__connected = True
+
                     self.__message_queue.put(message)
 
     def run(self):

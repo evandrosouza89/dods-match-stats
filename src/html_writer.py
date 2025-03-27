@@ -1,19 +1,27 @@
 import io
 import logging
 import os
+import sys
 
 from yattag import Doc
 
 from . import styles
+from .utils import Utils
 
 
 class HtmlWriter:
 
-    def __init__(self, output_dir, topic_writer):
+    def __init__(self, output_dir):
         self.__output_dir = output_dir
-        self.__topic_writer = topic_writer
+
+        if not Utils.test_file_creation(output_dir):
+            logging.error(
+                "[HtmlWriter] - Unable to write to the OUTPUT_DIR: " + output_dir + ". Verify the folder permissions.")
+
+            sys.exit(2)
 
     def write(self, table_match_half1, table_match_half2):
+
         logging.info(
             "[HtmlWriter] - Writing " + str(table_match_half1.id)
             + "_" + str(table_match_half2.id) + "@" + table_match_half1.map_name)
@@ -46,11 +54,11 @@ class HtmlWriter:
             elif player.team == "Axis":
                 team1_players.add(player.player)
 
-        file_name = str(table_match_half1.start_time_stamp).replace("-", "_").replace(":", "_") + "_" + str(
-            table_match_half1.id) + "_" + str(table_match_half2.id) + "@" + table_match_half1.map_name
+        file_name = Utils.generate_file_name(table_match_half1, table_match_half2)
 
         HtmlWriter._write_html(self.__output_dir,
-                               file_name, map_name,
+                               file_name,
+                               map_name,
                                table_match_half1,
                                table_match_half2,
                                spectators,
@@ -63,9 +71,6 @@ class HtmlWriter:
 
         logging.info(
             "[HtmlWriter] - Writing " + file_name + " done")
-
-        topic_name = str(table_match_half1.start_time_stamp) + "@" + table_match_half1.map_name
-        self.__topic_writer.write(file_name, topic_name)
 
     @staticmethod
     def _write_html(output_dir,

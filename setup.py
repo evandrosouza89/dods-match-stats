@@ -1,9 +1,9 @@
 from setuptools import setup
 
 setup(
-    name='dods_match_stats',
-    version='1.0',
-    packages=['dods_match_stats'],
+    name='src',
+    version='1.1',
+    packages=['src'],
     url='https://github.com/evandrosouza89/dods-match-stats',
     license='MIT',
     author='Evandro Souza',
@@ -12,8 +12,10 @@ setup(
     install_requires=[
         'setuptools',
         'configparser',
-        'SQLAlchemy',
         'yattag',
-        'requests'
+        'requests',
+        'SQLAlchemy',
+        'discord',
+        'discord.py'
     ],
 )

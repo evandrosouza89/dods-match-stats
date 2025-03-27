@@ -1,25 +1,34 @@
-version: '3.9'
-
 services:
   app:
     build: .
     environment:
-      - DMS_SV_IP
+      - HOME_DIR
+      - OUTPUT_DIR
+      - DMS_INSTANCE_NAME
+      - DMS_OUTPUT_DIR
+      - DMS_GAME_SERVER_IP
       - DMS_PORT
       - DMS_DB_URL
       - DMS_DB_PORT
       - DMS_DB_USR
       - DMS_DB_PW
-      - DMS_DB_SCH
-      - DMS_HOME
-      - DMS_HTML_OUTPUT
+      - DMS_DB_SCHEMA
+      - DMS_EXTERNAL_URL
+      - DMS_DISCORD_ENABLED
+      - DMS_DISCORD_TOKEN
+      - DMS_DISCORD_CHANNEL_ID
+      - DMS_IPB_ENABLED
+      - DMS_IPB_API_URL
+      - DMS_IPB_API_KEY
+      - DMS_IPB_FORUM_ID
+      - DMS_IPB_AUTHOR_ID
+      - DMS_IPB_TOPIC_SUFFIX
+      - DMS_IPB_POST_PREFIX
+      - DMS_IPB_LINK_TEXT
     volumes:
-      - ${DMS_HTML_OUTPUT}:${DMS_HTML_OUTPUT}
+      - ${DMS_OUTPUT_DIR}:${OUTPUT_DIR}
     ports:
       - ${DMS_PORT}:${DMS_PORT}/udp
-    command: >
-      /bin/bash -c 'cp ${DMS_HOME}/assets/paper.jpg ${DMS_HTML_OUTPUT}
-      && ${DMS_HOME}/scripts/dods-match-stats.sh dms-instance-1'
     depends_on:
       db:
         condition: service_healthy
@@ -34,7 +43,7 @@ services:
       - MYSQL_ROOT_PASSWORD=${DMS_DB_PW}
       - MYSQL_PASSWORD=${DMS_DB_PW}
       - MYSQL_USER=${DMS_DB_USR}
-      - MYSQL_DATABASE=${DMS_DB_SCH}
+      - MYSQL_DATABASE=${DMS_DB_SCHEMA}
     healthcheck:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       timeout: 20s

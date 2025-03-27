@@ -1,9 +1,9 @@
 FROM python:3
 
-ENV DMS_HOME=/opt/dods-match-stats
-ENV DMS_HTML_OUTPUT=/var/www/dods-match-stats/html
+ENV HOME_DIR=${HOME_DIR:-/opt/dods-match-stats}
+ENV OUTPUT_DIR=${OUTPUT_DIR:-$HOME_DIR/reports}
 
-WORKDIR $DMS_HOME
+WORKDIR $HOME_DIR
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
@@ -12,11 +12,9 @@ RUN python3 -m pip install cryptography
 
 COPY . .
 
-RUN mkdir -p $DMS_HTML_OUTPUT
-COPY /assets/paper.jpg $DMS_HTML_OUTPUT
+RUN mkdir -p $OUTPUT_DIR
+COPY /assets/paper.jpg $OUTPUT_DIR
 
-RUN mkdir $DMS_HOME/logs
+RUN mkdir $HOME_DIR/logs
 
-RUN chmod u=rwx $DMS_HOME/scripts/dods-match-stats.sh
-
-CMD /bin/bash $DMS_HOME/scripts/dods-match-stats.sh dms-instance-1
+CMD ["python3", "__main__.py"]
