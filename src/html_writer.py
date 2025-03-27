@@ -1,6 +1,7 @@
 import io
 import logging
 import os
+import shutil
 import sys
 
 from yattag import Doc
@@ -14,9 +15,15 @@ class HtmlWriter:
     def __init__(self, output_dir):
         self.__output_dir = output_dir
 
-        if not Utils.test_file_creation(output_dir):
+        if not HtmlWriter.test_file_creation(output_dir):
             logging.error(
                 "[HtmlWriter] - Unable to write to the OUTPUT_DIR: " + output_dir + ". Verify the folder permissions.")
+
+            sys.exit(2)
+
+        if not HtmlWriter.copy_paper_background_file(output_dir):
+            logging.error(
+                "[HtmlWriter] - Unable to copy the paper image background to the OUTPUT_DIR: " + output_dir)
 
             sys.exit(2)
 
@@ -71,6 +78,51 @@ class HtmlWriter:
 
         logging.info(
             "[HtmlWriter] - Writing " + file_name + " done")
+
+    @staticmethod
+    def test_file_creation(output_dir):
+
+        test_filename = "write_check.tmp"
+        test_filepath = os.path.join(output_dir, test_filename)
+
+        # Remove the test file if it already exists
+        if os.path.exists(test_filepath):
+            os.remove(test_filepath)
+
+        with open(test_filepath, "w") as f:
+            f.write("write check")
+
+        if not os.path.exists(test_filepath):
+            success = False
+        else:
+            success = True
+
+        os.remove(test_filepath)
+
+        return success
+
+    @staticmethod
+    def copy_paper_background_file(output_dir):
+
+        paper_filename = "paper.jpg"
+
+        script_dir = os.path.dirname(os.path.abspath(__file__))  # Directory where html_writer.py is
+
+        source_path = os.path.join(script_dir, "..", "assets", paper_filename)
+        source_path = os.path.abspath(source_path)  # Convert to absolute path
+
+        destination_path = os.path.join(output_dir, paper_filename)
+
+        # Paper background is already copied to the output dir
+        if os.path.exists(destination_path):
+            return True
+
+        shutil.copy(source_path, destination_path)
+
+        if not os.path.exists(destination_path):
+            return False
+        else:
+            return True
 
     @staticmethod
     def _write_html(output_dir,

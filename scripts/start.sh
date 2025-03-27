@@ -10,11 +10,11 @@ DMS_DB_PW="secret"
 DMS_DB_SCHEMA="dods-match-stats"
 DMS_NETWORK="dms-network"
 
-function getContainerHealth {
+getContainerHealth() {
   docker inspect --format "{{.State.Health.Status}}" "$1"
 }
 
-function waitContainer {
+waitContainer() {
   while STATUS=$(getContainerHealth "$1"); [ "$STATUS" != "healthy" ]; do
     if [ "$STATUS" == "unhealthy" ]; then
       echo "Failed!"
@@ -28,7 +28,7 @@ function waitContainer {
 }
 
 # Check if the config file exists
-if [[ ! -f "$CONFIG_FILE" ]]; then
+if [ ! -f "$CONFIG_FILE" ]; then
   echo "Config file $CONFIG_FILE not found!"
   exit 1
 fi
@@ -86,6 +86,12 @@ waitContainer "$DMS_DB_URL"
 
 echo "Database container started!"
 
+# Check for updates for the Docker image
+
+echo "Checking for updates for the Docker image..."
+
+docker pull evandrosouza89/dods-match-stats:latest
+
 # Load servers from the server file and create a dods-match-stats container for each entry
 while IFS= read -r line; do
 
@@ -104,8 +110,14 @@ while IFS= read -r line; do
   HOME_DIR="/opt/dods-match-stats"
   OUTPUT_DIR="$HOME_DIR/reports"
 
-  # Either resume existing container or start a new one
-  docker start "$DMS_INSTANCE_NAME" >/dev/null 2>&1 || \
+  # Check if a container with the same name already exists
+  if docker ps -a --filter "name=$DMS_INSTANCE_NAME" --format '{{.Names}}' | grep -w "$DMS_INSTANCE_NAME"; then
+      # Stop and remove the existing container
+      echo "Container $DMS_INSTANCE_NAME already exists. Stopping and removing it."
+      docker stop "$DMS_INSTANCE_NAME"
+      docker rm "$DMS_INSTANCE_NAME"
+  fi
+
   docker run --name "$DMS_INSTANCE_NAME" \
               -d \
                --network="$DMS_NETWORK" \

@@ -13,7 +13,6 @@ RUN python3 -m pip install cryptography
 COPY . .
 
 RUN mkdir -p $OUTPUT_DIR
-COPY /assets/paper.jpg $OUTPUT_DIR
 
 RUN mkdir $HOME_DIR/logs
 
