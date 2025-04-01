@@ -16,7 +16,7 @@ class DatabaseHelper:
                                       + ":" + str(port)
                                       + "/" + schema
                                       + "?charset=utf8",
-                                      echo=False, pool_recycle=10, encoding="utf-8", pool_pre_ping=True)
+                                      echo=False, pool_recycle=10, pool_pre_ping=True)
 
         _Base.metadata.create_all(self.__engine)
 

@@ -1,7 +1,7 @@
 from .event import Event
 
 
-# Covers log file 'beggining of file' entry
+# Covers log file 'beginning of file' entry
 class BOFEventParser:
 
     @staticmethod

@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='src',
-    version='1.1',
+    version='2.0',
     packages=['src'],
     url='https://github.com/evandrosouza89/dods-match-stats',
     license='MIT',
@@ -11,11 +11,14 @@ setup(
     description='A HL Log Standard parser and competitive match stats generator for Day of Defeat Source game.',
     install_requires=[
         'setuptools',
-        'configparser',
-        'yattag',
-        'requests',
-        'SQLAlchemy',
-        'discord',
-        'discord.py'
+        'certifi'
+        'charset-normalizer'
+        'greenlet'
+        'idna'
+        'requests'
+        'SQLAlchemy'
+        'typing_extensions'
+        'urllib3'
+        'yattag'
     ],
 )
