@@ -9,6 +9,12 @@ DMS_DB_USR="secret"
 DMS_DB_PW="secret"
 DMS_DB_SCHEMA="dods-match-stats"
 DMS_NETWORK="dms-network"
+DMS_SUBNET_BASE="192.168.101"
+DMS_SUBNET="$DMS_SUBNET_BASE.0/24"
+
+# Static IP assignments
+DMS_DB_IP="$DMS_SUBNET_BASE.2"
+BASE_INSTANCE_IP="$DMS_SUBNET_BASE.10"
 
 getContainerHealth() {
   docker inspect --format "{{.State.Health.Status}}" "$1"
@@ -52,27 +58,30 @@ if [ ! -d "$DMS_OUTPUT_DIR" ]; then
 fi
 
 if ! docker info > /dev/null 2>&1; then
-  echo "This script uses docker, and it isn't running - please start docker and try again!"
+  echo "This script uses Docker, and it isn't running - please start Docker and try again!"
   exit 1
 fi
 
 if ! [ -f "$SERVERS_FILE" ]; then
-    echo "This script reads a input file named $SERVERS_FILE - please create $SERVERS_FILE, fill it with one <game server ip>;<desired dods-match-stats port> per line and try again!"
+    echo "This script requires an input file named $SERVERS_FILE - please create it and try again!"
     exit 1
 fi
 
-echo "Creating network..."
+echo "Creating network with subnet $DMS_SUBNET..."
 
-docker network create "$DMS_NETWORK" >/dev/null 2>&1
+docker network create \
+  --subnet="$DMS_SUBNET" \
+  "$DMS_NETWORK" >/dev/null 2>&1
 
 echo "Network created!"
 
-echo "Starting database container..."
+echo "Starting database container with fixed IP $DMS_DB_IP..."
 
 docker start "$DMS_DB_URL" >/dev/null 2>&1 || \
 docker run --name "$DMS_DB_URL" \
           -P \
-          -p "$DMS_DB_PORT":"$DMS_DB_PORT" \
+          --ip "$DMS_DB_IP" \
+          -p "$DMS_DB_PORT:$DMS_DB_PORT" \
           -d \
           -e MYSQL_ROOT_PASSWORD="$DMS_DB_PW" \
           -e MYSQL_USER="$DMS_DB_USR" \
@@ -93,6 +102,8 @@ echo "Checking for updates for the Docker image..."
 docker pull evandrosouza89/dods-match-stats:latest
 
 # Load servers from the server file and create a dods-match-stats container for each entry
+instance_index=0
+
 while IFS= read -r line; do
 
   # Skip empty lines
@@ -105,12 +116,15 @@ while IFS= read -r line; do
 
   DMS_INSTANCE_NAME="dods-match-stats$port"
 
-  echo "Starting $DMS_INSTANCE_NAME for game server $ip..."
+  BASE_INSTANCE_LAST_OCTET=${BASE_INSTANCE_IP##*.}  # Extracts the last octet
+  INSTANCE_IP="$DMS_SUBNET_BASE.$((BASE_INSTANCE_LAST_OCTET + instance_index))"
+
+  echo "Starting $DMS_INSTANCE_NAME for game server $ip with fixed IP $INSTANCE_IP..."
 
   HOME_DIR="/opt/dods-match-stats"
   OUTPUT_DIR="$HOME_DIR/reports"
 
-  # Check if a container with the same name already exists
+  # Remove existing container if needed
   if docker ps -a --filter "name=$DMS_INSTANCE_NAME" --format '{{.Names}}' | grep -w "$DMS_INSTANCE_NAME"; then
       # Stop and remove the existing container
       echo "Container $DMS_INSTANCE_NAME already exists. Stopping and removing it."
@@ -120,36 +134,39 @@ while IFS= read -r line; do
 
   docker run --name "$DMS_INSTANCE_NAME" \
               -d \
-               --network="$DMS_NETWORK" \
-               -v "$DMS_OUTPUT_DIR":"/opt/dods-match-stats/reports" \
-               -e HOME_DIR="$HOME_DIR" \
-               -e OUTPUT_DIR="$OUTPUT_DIR" \
-               -e DMS_INSTANCE_NAME="$DMS_INSTANCE_NAME" \
-               -e DMS_OUTPUT_DIR="$DMS_OUTPUT_DIR" \
-               -e DMS_GAME_SERVER_IP="$ip" \
-               -e DMS_PORT="$port" \
-               -e DMS_DB_URL="$DMS_DB_URL" \
-               -e DMS_DB_PORT="$DMS_DB_PORT" \
-               -e DMS_DB_USR="$DMS_DB_USR" \
-               -e DMS_DB_PW="$DMS_DB_PW" \
-               -e DMS_DB_SCHEMA="$DMS_DB_SCHEMA" \
-               -e DMS_EXTERNAL_URL="$DMS_EXTERNAL_URL" \
-               -e DMS_DISCORD_ENABLED="$DMS_DISCORD_ENABLED" \
-               -e DMS_DISCORD_TOKEN="$DMS_DISCORD_TOKEN" \
-               -e DMS_DISCORD_CHANNEL_ID="$DMS_DISCORD_CHANNEL_ID" \
-               -e DMS_IPB_ENABLED="$DMS_IPB_ENABLED" \
-               -e DMS_IPB_API_URL="$DMS_IPB_API_URL" \
-               -e DMS_IPB_API_KEY="$DMS_IPB_API_KEY" \
-               -e DMS_IPB_FORUM_ID="$DMS_IPB_FORUM_ID" \
-               -e DMS_IPB_AUTHOR_ID="$DMS_IPB_AUTHOR_ID" \
-               -e DMS_IPB_TOPIC_SUFFIX="$DMS_IPB_TOPIC_SUFFIX" \
-               -e DMS_IPB_POST_PREFIX="$DMS_IPB_POST_PREFIX" \
-               -e DMS_IPB_LINK_TEXT="$DMS_IPB_LINK_TEXT" \
-               evandrosouza89/dods-match-stats:latest
+              --network="$DMS_NETWORK" \
+              --ip "$INSTANCE_IP" \
+              -p "$port:$port/udp" \
+              -v "$DMS_OUTPUT_DIR":"/opt/dods-match-stats/reports" \
+              -e HOME_DIR="$HOME_DIR" \
+              -e OUTPUT_DIR="$OUTPUT_DIR" \
+              -e DMS_INSTANCE_NAME="$DMS_INSTANCE_NAME" \
+              -e DMS_OUTPUT_DIR="$DMS_OUTPUT_DIR" \
+              -e DMS_GAME_SERVER_IP="$ip" \
+              -e DMS_PORT="$port" \
+              -e DMS_DB_URL="$DMS_DB_URL" \
+              -e DMS_DB_PORT="$DMS_DB_PORT" \
+              -e DMS_DB_USR="$DMS_DB_USR" \
+              -e DMS_DB_PW="$DMS_DB_PW" \
+              -e DMS_DB_SCHEMA="$DMS_DB_SCHEMA" \
+              -e DMS_EXTERNAL_URL="$DMS_EXTERNAL_URL" \
+              -e DMS_DISCORD_ENABLED="$DMS_DISCORD_ENABLED" \
+              -e DMS_DISCORD_TOKEN="$DMS_DISCORD_TOKEN" \
+              -e DMS_DISCORD_CHANNEL_ID="$DMS_DISCORD_CHANNEL_ID" \
+              -e DMS_IPB_ENABLED="$DMS_IPB_ENABLED" \
+              -e DMS_IPB_API_URL="$DMS_IPB_API_URL" \
+              -e DMS_IPB_API_KEY="$DMS_IPB_API_KEY" \
+              -e DMS_IPB_FORUM_ID="$DMS_IPB_FORUM_ID" \
+              -e DMS_IPB_AUTHOR_ID="$DMS_IPB_AUTHOR_ID" \
+              -e DMS_IPB_TOPIC_SUFFIX="$DMS_IPB_TOPIC_SUFFIX" \
+              -e DMS_IPB_POST_PREFIX="$DMS_IPB_POST_PREFIX" \
+              -e DMS_IPB_LINK_TEXT="$DMS_IPB_LINK_TEXT" \
+              evandrosouza89/dods-match-stats:latest
 
   sleep 3
+  echo "Game log parser started at UDP port $port on IP $INSTANCE_IP!"
 
-  echo "Game log parser started at UDP port $port!"
+  ((instance_index++))
 
 done < "$SERVERS_FILE"
 
