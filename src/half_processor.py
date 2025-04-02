@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import time
 
@@ -33,7 +34,7 @@ class HalfProcessor:
 
                         self.__html_writer.write(match_first_half_item, match_item)
 
-                        self.perform_post_file_writing_actions(match_first_half_item, match_item)
+                        self.__perform_post_file_writing_actions(match_first_half_item, match_item)
 
                         self.__first_half_id = None
 
@@ -55,14 +56,14 @@ class HalfProcessor:
 
             session.close()
 
-    def perform_post_file_writing_actions(self, table_match_half1, table_match_half2):
+    def __perform_post_file_writing_actions(self, table_match_half1, table_match_half2):
 
         topic_name = str(table_match_half1.start_time_stamp) + "@" + table_match_half1.map_name
         file_name = Utils.generate_file_name(table_match_half1, table_match_half2)
 
-        self.__topic_writer.write(file_name, topic_name)
+        asyncio.run(self.__topic_writer.write(file_name, topic_name))
 
-        self.__discord_writer.write(file_name)
+        asyncio.run(self.__discord_writer.write(file_name))
 
     @staticmethod
     def __check_map_name(first_half, table_match):
