@@ -10,7 +10,14 @@ class DiscordWriter:
     __API_BASE_URL = "https://discord.com/api/v10"
 
     def __init__(self):
-        self.__enabled = os.getenv("DMS_DISCORD_ENABLED")
+
+        enabled_value = os.getenv("DMS_DISCORD_ENABLED")
+
+        if enabled_value is not None:
+            self.__enabled = "true" == enabled_value.lower()
+        else:
+            self.__enabled = False
+
         self.__token = os.getenv("DMS_DISCORD_TOKEN")
         self.__channel_id = os.getenv("DMS_DISCORD_CHANNEL_ID")
         self.__external_url = os.getenv("DMS_EXTERNAL_URL")

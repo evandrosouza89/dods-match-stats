@@ -9,6 +9,14 @@ import requests
 class TopicWriter:
 
     def __init__(self):
+
+        enabled_value = os.getenv("DMS_IPB_ENABLED")
+
+        if enabled_value is not None:
+            self.__enabled = "true" == enabled_value.lower()
+        else:
+            self.__enabled = False
+
         self.__enabled = os.getenv("DMS_IPB_ENABLED")
         self.__api_url = os.getenv("DMS_IPB_API_URL")
         self.__api_key = os.getenv("DMS_IPB_API_KEY")
