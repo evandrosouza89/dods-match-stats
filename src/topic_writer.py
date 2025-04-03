@@ -17,7 +17,6 @@ class TopicWriter:
         else:
             self.__enabled = False
 
-        self.__enabled = os.getenv("DMS_IPB_ENABLED")
         self.__api_url = os.getenv("DMS_IPB_API_URL")
         self.__api_key = os.getenv("DMS_IPB_API_KEY")
         self.__forum_id = os.getenv("DMS_IPB_FORUM_ID")
