@@ -149,6 +149,6 @@ class DiscordWriter:
 
         url = re.sub(r"/$", "", external_url)
 
-        url += "/" + file_name
+        url += "/" + file_name + ".html"
 
-        return url
+        return  "[Click to view](" + url + ")"

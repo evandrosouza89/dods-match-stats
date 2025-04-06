@@ -39,8 +39,6 @@ class TopicWriter:
 
             url = re.sub(r"/$", "", self.__external_url)
 
-            if not url.startswith("http://"):
-                url = "http://" + url
             url += "/" + file_name
 
             post = "<p>" + self.__post_prefix + " " + "<a href=\"" + url + ".html\">" + self.__link_text + "</a></p>"
