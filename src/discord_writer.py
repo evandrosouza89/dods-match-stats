@@ -2,6 +2,7 @@ import logging
 import os
 import re
 import sys
+from urllib.parse import quote
 
 import requests
 
@@ -23,7 +24,6 @@ class DiscordWriter:
         self.__external_url = os.getenv("DMS_EXTERNAL_URL")
 
         if self.__enabled:
-
             # Headers
             self.__headers = {
                 "Authorization": "Bot " + self.__token,
@@ -131,11 +131,7 @@ class DiscordWriter:
                     "[DiscordWriter] - Failed to send report title message. Response code is " + str(
                         response.status_code))
 
-            report_link = self.__build_link_url(file_name, self.__external_url)
-
-            payload = {
-                "content": report_link
-            }
+            payload = self.__build_embed_payload(report_title, file_name, self.__external_url)
 
             response = requests.post(send_url, json=payload, headers=self.__headers)
 
@@ -145,10 +141,23 @@ class DiscordWriter:
                         response.status_code))
 
     @staticmethod
-    def __build_link_url(file_name, external_url):
+    def __build_embed_payload(report_title, file_name, external_url):
 
+        # Remove trailing slash from external_url
         url = re.sub(r"/$", "", external_url)
 
-        url += "/" + file_name + ".html"
+        # URL-encode the file name
+        safe_file_name = quote(file_name)
 
-        return  "[Click to view](" + url + ")"
+        # Build the full URL
+        full_url = f"{url}/{safe_file_name}.html"
+
+        # Return a Discord embed payload
+        return {
+            "embeds": [
+                {
+                    "title": report_title,
+                    "url": full_url
+                }
+            ]
+        }
